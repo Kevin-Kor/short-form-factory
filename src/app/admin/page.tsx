@@ -186,6 +186,35 @@ export default function AdminPage() {
         }
     };
 
+    const handleDelete = async (table: string, id: string | number) => {
+        if (!confirm("정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.")) return;
+
+        try {
+            const { error } = await supabase
+                .from(table)
+                .delete()
+                .eq('id', id);
+
+            if (error) throw error;
+
+            if (table === 'orders') {
+                setOrders(orders.filter(o => o.id !== id));
+            } else if (table === 'profiles') {
+                setUsers(users.filter(u => u.id !== id));
+            } else if (table === 'credit_requests') {
+                setCreditRequests(creditRequests.filter(c => c.id !== id));
+            } else if (table === 'business_info') {
+                setBusinessInfos(businessInfos.filter(b => b.id !== id));
+            }
+
+            fetchStats(); // Refresh stats
+            alert("삭제되었습니다.");
+        } catch (error) {
+            console.error(`Error deleting from ${table}:`, error);
+            alert("삭제 실패: 권한이 없거나 오류가 발생했습니다.");
+        }
+    };
+
     if (isLoading || loading) {
         return (
             <div className="flex items-center justify-center min-h-[60vh]">
@@ -278,7 +307,9 @@ export default function AdminPage() {
                 )}
                 {activeTab === "orders" && (
                     <div className="p-6">
-                        <h3 className="text-lg font-bold text-accent mb-4">최근 주문 내역</h3>
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-lg font-bold text-accent">최근 주문 내역</h3>
+                        </div>
                         <div className="overflow-x-auto">
                             <table className="w-full text-sm text-left">
                                 <thead className="bg-gray-50 text-gray-500 font-medium">
@@ -327,6 +358,12 @@ export default function AdminPage() {
                                                         대기 처리
                                                     </button>
                                                 )}
+                                                <button
+                                                    className="px-3 py-1 bg-red-100 text-red-600 rounded-md text-xs hover:bg-red-200 ml-2"
+                                                    onClick={() => handleDelete('orders', order.id)}
+                                                >
+                                                    삭제
+                                                </button>
                                             </td>
                                         </tr>
                                     ))}
@@ -347,6 +384,7 @@ export default function AdminPage() {
                                         <th className="px-4 py-3">이름</th>
                                         <th className="px-4 py-3">보유 크레딧</th>
                                         <th className="px-4 py-3">가입일</th>
+                                        <th className="px-4 py-3 rounded-r-lg">관리</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100">
@@ -356,6 +394,14 @@ export default function AdminPage() {
                                             <td className="px-4 py-3">{u.full_name || '-'}</td>
                                             <td className="px-4 py-3 font-bold text-blue-600">{(u.credit_balance || 0).toLocaleString()}원</td>
                                             <td className="px-4 py-3 text-gray-500">{new Date(u.created_at).toLocaleDateString()}</td>
+                                            <td className="px-4 py-3">
+                                                <button
+                                                    className="px-3 py-1 bg-red-100 text-red-600 rounded-md text-xs hover:bg-red-200"
+                                                    onClick={() => handleDelete('profiles', u.id)}
+                                                >
+                                                    삭제
+                                                </button>
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -401,7 +447,7 @@ export default function AdminPage() {
                                                     <>
                                                         <button
                                                             onClick={() => handleCreditRequest(req.id, req.user_id, req.amount, 'approved')}
-                                                            className="px-3 py-1 bg-blue-600 text-white rounded-md text-xs hover:bg-blue-700"
+                                                            className="px-3 py-1 bg-green-100 text-green-600 rounded-md text-xs hover:bg-green-200"
                                                         >
                                                             승인
                                                         </button>
@@ -413,6 +459,12 @@ export default function AdminPage() {
                                                         </button>
                                                     </>
                                                 )}
+                                                <button
+                                                    className="px-3 py-1 bg-red-100 text-red-600 rounded-md text-xs hover:bg-red-200 ml-2"
+                                                    onClick={() => handleDelete('credit_requests', req.id)}
+                                                >
+                                                    삭제
+                                                </button>
                                             </td>
                                         </tr>
                                     ))}
@@ -434,7 +486,8 @@ export default function AdminPage() {
                                         <th className="px-4 py-3">사업자번호</th>
                                         <th className="px-4 py-3">대표자</th>
                                         <th className="px-4 py-3">업태/종목</th>
-                                        <th className="px-4 py-3 rounded-r-lg">이메일</th>
+                                        <th className="px-4 py-3">이메일</th>
+                                        <th className="px-4 py-3 rounded-r-lg">관리</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100">
@@ -446,6 +499,14 @@ export default function AdminPage() {
                                             <td className="px-4 py-3">{info.representative_name}</td>
                                             <td className="px-4 py-3">{info.business_type} / {info.business_item}</td>
                                             <td className="px-4 py-3 text-gray-500">{info.email}</td>
+                                            <td className="px-4 py-3">
+                                                <button
+                                                    className="px-3 py-1 bg-red-100 text-red-600 rounded-md text-xs hover:bg-red-200"
+                                                    onClick={() => handleDelete('business_info', info.id)}
+                                                >
+                                                    삭제
+                                                </button>
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>

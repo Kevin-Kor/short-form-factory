@@ -77,23 +77,26 @@ export function Sidebar() {
 
             <div className="p-4 border-t border-border">
                 {isLoggedIn && user ? (
-                    <div className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-100 transition-colors group">
+                    <Link href="/profile" className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-100 transition-colors group w-full">
                         <div className="flex items-center">
                             <div className="h-9 w-9 rounded-full bg-gray-200 flex items-center justify-center">
                                 <span className="text-xs font-bold text-gray-600">{(user.user_metadata?.name || user.email || "U")[0].toUpperCase()}</span>
                             </div>
-                            <div className="ml-3">
+                            <div className="ml-3 text-left">
                                 <p className="text-sm font-bold text-accent">{user.user_metadata?.name || user.email?.split('@')[0]}</p>
                                 <p className="text-xs text-muted truncate w-24">{user.email}</p>
                             </div>
                         </div>
                         <button
-                            onClick={logout}
+                            onClick={(e) => {
+                                e.preventDefault(); // Prevent navigation when clicking logout
+                                logout();
+                            }}
                             className="text-xs text-muted hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
                         >
                             로그아웃
                         </button>
-                    </div>
+                    </Link>
                 ) : (
                     <Link href="/login">
                         <div className="w-full bg-primary text-white rounded-xl py-3 flex items-center justify-center font-bold hover:bg-primary/90 transition-all duration-300 cursor-pointer shadow-sm">

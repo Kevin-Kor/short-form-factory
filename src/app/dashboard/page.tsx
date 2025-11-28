@@ -3,6 +3,7 @@
 import { ServiceCard } from "@/components/dashboard/ServiceCard";
 import { Camera, Scissors, Video, Layers, PlayCircle } from "lucide-react";
 import { motion, Variants } from "framer-motion";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 
 const container: Variants = {
@@ -29,6 +30,7 @@ const item: Variants = {
 };
 
 export default function DashboardPage() {
+    const router = useRouter();
     return (
         <div className="space-y-12 max-w-5xl mx-auto">
             {/* Header / Profile (Mobile style moved to Sidebar/Header component, but we keep a welcome message here) */}
@@ -64,9 +66,12 @@ export default function DashboardPage() {
                     <p className="text-muted text-lg mb-8">
                         기획부터 편집까지, 숏폼 전문가들이<br className="md:hidden" /> 당신의 브랜드를 성장시켜 드립니다.
                     </p>
-                    <Button className="relative overflow-hidden bg-primary hover:bg-primary/90 text-white font-bold py-4 px-8 rounded-2xl text-lg shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95 group">
+                    <Button
+                        onClick={() => router.push('/order')}
+                        className="relative overflow-hidden bg-primary hover:bg-primary/90 text-white font-bold py-4 px-8 rounded-2xl text-lg shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95 group"
+                    >
                         <span className="relative z-10">지금 바로 시작하기</span>
-                        <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                        <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
                     </Button>
                 </div>
                 {/* Background Decor */}

@@ -1,0 +1,154 @@
+"use client";
+
+import { useAuth } from "@/context/AuthContext";
+import { User, Shield, Building2, CreditCard } from "lucide-react";
+import { useState } from "react";
+
+export default function ProfilePage() {
+    const { user } = useAuth();
+    const [activeTab, setActiveTab] = useState("profile");
+
+    if (!user) {
+        return <div className="p-8 text-center text-muted">로그인이 필요합니다.</div>;
+    }
+
+    const formatDate = (dateString?: string) => {
+        if (!dateString) return "-";
+        const date = new Date(dateString);
+        return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일 ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
+    };
+
+    return (
+        <div className="max-w-4xl mx-auto space-y-6">
+            <div className="flex justify-between items-end mb-8">
+                <div>
+                    <h1 className="text-3xl font-bold text-accent mb-2">마이페이지</h1>
+                    <p className="text-muted flex items-center gap-2">
+                        계정 정보를 관리하고 설정을 변경하세요 <span className="animate-spin-slow">⚙️</span>
+                    </p>
+                </div>
+                <div className="bg-blue-50 px-4 py-2 rounded-xl flex items-center gap-3 border border-blue-100">
+                    <CreditCard size={18} className="text-primary" />
+                    <span className="font-bold text-primary">0원</span>
+                    <span className="text-xs text-muted cursor-pointer hover:text-primary hover:underline">충전하러 가기 👆</span>
+                </div>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex space-x-2 bg-gray-100 p-1 rounded-xl w-fit">
+                <button
+                    onClick={() => setActiveTab("profile")}
+                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${activeTab === "profile" ? "bg-primary text-white shadow-md" : "text-gray-500 hover:text-gray-700"}`}
+                >
+                    <User size={16} /> 프로필 정보
+                </button>
+                <button
+                    onClick={() => setActiveTab("security")}
+                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${activeTab === "security" ? "bg-primary text-white shadow-md" : "text-gray-500 hover:text-gray-700"}`}
+                >
+                    <Shield size={16} /> 보안 설정
+                </button>
+                <button
+                    onClick={() => setActiveTab("business")}
+                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${activeTab === "business" ? "bg-primary text-white shadow-md" : "text-gray-500 hover:text-gray-700"}`}
+                >
+                    <Building2 size={16} /> 사업자 정보
+                </button>
+            </div>
+
+            {/* Content Area */}
+            <div className="bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
+                {activeTab === "profile" && (
+                    <div className="space-y-8">
+                        <div>
+                            <h2 className="text-lg font-bold text-accent mb-1">프로필 정보</h2>
+                            <p className="text-sm text-muted">회원정보를 확인하세요. (정보 변경은 고객센터에 문의해주세요)</p>
+                        </div>
+
+                        <div className="space-y-6">
+                            <div>
+                                <label className="block text-sm font-bold text-accent mb-2">아이디</label>
+                                <div className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-gray-600">
+                                    {user.id}
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-bold text-accent mb-2">이메일</label>
+                                <div className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-gray-600">
+                                    {user.email}
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-bold text-accent mb-2">닉네임</label>
+                                <div className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-gray-600">
+                                    {user.user_metadata?.name || "설정되지 않음"}
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-bold text-accent mb-2">연락처</label>
+                                <div className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-gray-600">
+                                    {user.phone || "010-0000-0000 (기본값)"}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="pt-6 border-t border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-bold text-accent mb-2">역할</label>
+                                <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-bold border border-gray-200">
+                                    회원
+                                </span>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-bold text-accent mb-2">가입일</label>
+                                <div className="text-gray-600 flex items-center gap-2">
+                                    📅 {formatDate(user.created_at)}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="pt-6 border-t border-gray-100 space-y-4">
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <p className="font-bold text-accent text-sm">카카오 연동</p>
+                                    <p className="text-xs text-muted">카카오 계정과의 연동 상태</p>
+                                </div>
+                                <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-bold">
+                                    {user.app_metadata?.provider === 'kakao' ? '연동됨' : '연동 안됨'}
+                                </span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <p className="font-bold text-accent text-sm">일반 회원가입</p>
+                                    <p className="text-xs text-muted">아이디/비밀번호 로그인 가능 상태</p>
+                                </div>
+                                <span className="px-3 py-1 bg-gray-100 text-gray-500 rounded-full text-xs font-bold border border-gray-200">
+                                    {user.app_metadata?.provider === 'email' ? '가입됨' : '가입 안됨'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === "security" && (
+                    <div className="text-center py-12">
+                        <Shield size={48} className="mx-auto text-gray-300 mb-4" />
+                        <h3 className="text-lg font-bold text-accent mb-2">보안 설정 준비 중</h3>
+                        <p className="text-muted">비밀번호 변경 및 2단계 인증 기능이 곧 추가될 예정입니다.</p>
+                    </div>
+                )}
+
+                {activeTab === "business" && (
+                    <div className="text-center py-12">
+                        <Building2 size={48} className="mx-auto text-gray-300 mb-4" />
+                        <h3 className="text-lg font-bold text-accent mb-2">사업자 정보 관리</h3>
+                        <p className="text-muted">세금계산서 발행을 위한 사업자 정보 등록 기능이 곧 추가될 예정입니다.</p>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}

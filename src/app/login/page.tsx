@@ -30,7 +30,7 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-[80vh] bg-background">
+        <div className="flex flex-col items-center justify-center min-h-[80vh] bg-gray-50">
             {showSuccess && (
                 <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm">
                     <div className="bg-white p-8 rounded-2xl shadow-2xl text-center animate-[scaleIn_0.3s_ease-out]">
@@ -58,7 +58,7 @@ export default function LoginPage() {
                                 type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                className="w-full bg-gray-100 border-none rounded-xl py-4 pl-12 pr-4 text-accent placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                                className="w-full bg-white border border-gray-200 rounded-xl py-4 pl-12 pr-4 text-accent placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all shadow-sm"
                                 placeholder="name@example.com"
                                 required
                             />
@@ -72,7 +72,7 @@ export default function LoginPage() {
                                 type="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                className="w-full bg-gray-100 border-none rounded-xl py-4 pl-12 pr-4 text-accent placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                                className="w-full bg-white border border-gray-200 rounded-xl py-4 pl-12 pr-4 text-accent placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all shadow-sm"
                                 placeholder="••••••••"
                                 required
                             />
@@ -88,7 +88,7 @@ export default function LoginPage() {
                         <div className="w-full border-t border-gray-200"></div>
                     </div>
                     <div className="relative flex justify-center text-sm">
-                        <span className="px-4 bg-background text-gray-400">SNS 계정으로 로그인</span>
+                        <span className="px-4 bg-gray-50 text-gray-400">SNS 계정으로 로그인</span>
                     </div>
                 </div>
 

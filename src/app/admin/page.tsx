@@ -28,6 +28,8 @@ export default function AdminPage() {
         pendingCreditsCount: 0
     });
 
+    const [error, setError] = useState<string | null>(null);
+
     useEffect(() => {
         if (!isLoading) {
             if (!isLoggedIn || user?.email !== ADMIN_EMAIL) {
@@ -58,6 +60,7 @@ export default function AdminPage() {
 
     const fetchData = async () => {
         setLoading(true);
+        setError(null); // Reset error
         try {
             if (activeTab === "orders") {
                 // Fetch orders first (without join to avoid RLS/FK issues)
@@ -86,6 +89,7 @@ export default function AdminPage() {
                     user: profilesMap[order.user_id] || { email: 'Unknown' }
                 }));
 
+                console.log("Fetched Orders:", ordersWithUser); // Debug log
                 setOrders(ordersWithUser);
 
             } else if (activeTab === "users") {
@@ -110,8 +114,9 @@ export default function AdminPage() {
                 if (error) throw error;
                 setBusinessInfos(data || []);
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error(`Error fetching ${activeTab}:`, error);
+            setError(error.message || "데이터를 불러오는 중 오류가 발생했습니다.");
         } finally {
             setLoading(false);
         }

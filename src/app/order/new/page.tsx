@@ -5,14 +5,13 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
-import { Check, ChevronRight, Upload, Camera, Scissors, Video, Layers, Info, Minus, Plus } from "lucide-react";
+import { Check, ChevronRight, Camera, Scissors, Video, Layers, Info, Minus, Plus } from "lucide-react";
 
 const steps = [
     { id: 1, name: "서비스 선택" },
     { id: 2, name: "세부 옵션" },
     { id: 3, name: "상세 요청" },
-    { id: 4, name: "파일 업로드" },
-    { id: 5, name: "결제" },
+    { id: 4, name: "결제" },
 ];
 
 function OrderForm() {
@@ -80,13 +79,8 @@ function OrderForm() {
     const { user } = useAuth(); // Get user from auth context
 
     const handleNext = async () => {
-        if (currentStep < 5) {
-            // Skip file upload step for shooting-only service
-            if (currentStep === 3 && formData.serviceType === "shooting") {
-                setCurrentStep(5);
-            } else {
-                setCurrentStep(prev => prev + 1);
-            }
+        if (currentStep < 4) {
+            setCurrentStep(prev => prev + 1);
         } else {
             // Submit Order
             try {
@@ -109,11 +103,7 @@ function OrderForm() {
         }
     };
     const prevStep = () => {
-        if (currentStep === 5 && isShooting) {
-            setCurrentStep(3);
-        } else {
-            setCurrentStep((prev) => Math.max(prev - 1, 1));
-        }
+        setCurrentStep((prev) => Math.max(prev - 1, 1));
     };
 
     const isShooting = ["shooting", "shooting_editing", "all_in_one"].includes(formData.serviceType);
@@ -127,31 +117,36 @@ function OrderForm() {
                 {/* Progress Stepper */}
                 <div className="mb-12">
                     <div className="flex items-center justify-between relative">
-                        <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-full h-0.5 bg-gray-200 -z-10" />
-                        {steps.map((step) => {
-                            // Hide File Upload step in stepper for Shooting services
-                            if (isShooting && step.id === 4) return null;
-
+                        {steps.map((step, index) => {
                             return (
-                                <div key={step.id} className="flex flex-col items-center bg-background px-2">
-                                    <div
-                                        className={cn(
-                                            "w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all duration-300 shadow-lg",
-                                            step.id <= currentStep
-                                                ? "bg-primary text-white shadow-primary/30 scale-110"
-                                                : "bg-gray-200 text-gray-400"
-                                        )}
-                                    >
-                                        {step.id < currentStep ? <Check size={20} /> : step.id}
+                                <div key={step.id} className="flex items-center relative z-10">
+                                    <div className="flex flex-col items-center bg-background px-4">
+                                        <div
+                                            className={cn(
+                                                "w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all duration-300 shadow-lg",
+                                                step.id <= currentStep
+                                                    ? "bg-primary text-white shadow-primary/30 scale-110"
+                                                    : "bg-gray-200 text-gray-400"
+                                            )}
+                                        >
+                                            {step.id < currentStep ? <Check size={20} /> : step.id}
+                                        </div>
+                                        <span
+                                            className={cn(
+                                                "text-xs mt-3 font-medium transition-colors whitespace-nowrap",
+                                                step.id <= currentStep ? "text-primary" : "text-gray-400"
+                                            )}
+                                        >
+                                            {step.name}
+                                        </span>
                                     </div>
-                                    <span
-                                        className={cn(
-                                            "text-xs mt-3 font-medium transition-colors",
-                                            step.id <= currentStep ? "text-primary" : "text-gray-400"
-                                        )}
-                                    >
-                                        {step.name}
-                                    </span>
+                                    {/* Line Connector */}
+                                    {index < steps.length - 1 && (
+                                        <div className={cn(
+                                            "w-20 h-0.5 mx-2 transition-colors duration-300",
+                                            step.id < currentStep ? "bg-primary" : "bg-gray-200"
+                                        )} />
+                                    )}
                                 </div>
                             );
                         })}
@@ -424,18 +419,9 @@ function OrderForm() {
                         </div>
                     )}
 
-                    {currentStep === 4 && (
-                        <div className="space-y-6">
-                            <h2 className="text-xl font-semibold text-accent">소스 파일을 업로드해주세요</h2>
-                            <div className="border-2 border-dashed border-gray-200 rounded-xl p-10 flex flex-col items-center justify-center text-gray-400 hover:border-primary hover:text-primary hover:bg-blue-50 transition-all cursor-pointer bg-gray-50">
-                                <Upload size={32} className="mb-4" />
-                                <p className="text-lg font-medium text-gray-600 group-hover:text-primary">드래그 앤 드롭 또는 클릭하여 업로드</p>
-                                <p className="text-sm mt-2 text-gray-400">영상, 이미지, 로고 파일 등 (최대 500MB)</p>
-                            </div>
-                        </div>
-                    )}
 
-                    {currentStep === 5 && (
+
+                    {currentStep === 4 && (
                         <div className="space-y-8">
                             <h2 className="text-xl font-semibold text-accent">결제 정보 확인</h2>
 
@@ -528,7 +514,7 @@ function OrderForm() {
                         이전 단계
                     </Button>
 
-                    {currentStep < 5 ? (
+                    {currentStep < 4 ? (
                         <Button onClick={handleNext} className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20">
                             다음 단계 <ChevronRight size={16} className="ml-2" />
                         </Button>

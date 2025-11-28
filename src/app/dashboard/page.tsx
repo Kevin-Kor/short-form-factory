@@ -38,7 +38,12 @@ export default function DashboardPage() {
                 transition={{ duration: 0.5 }}
                 className="flex justify-between items-center"
             >
-                <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-500">Shortform Factory</h1>
+                <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                        <span className="text-white font-bold text-xl">S</span>
+                    </div>
+                    <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-500">Shortform Factory</h1>
+                </div>
                 <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
                     <span className="text-xs font-bold text-gray-600">U</span>
                 </div>
@@ -59,8 +64,9 @@ export default function DashboardPage() {
                     <p className="text-muted text-lg mb-8">
                         기획부터 편집까지, 숏폼 전문가들이<br className="md:hidden" /> 당신의 브랜드를 성장시켜 드립니다.
                     </p>
-                    <Button className="bg-primary hover:bg-primary/90 text-white font-bold py-4 px-8 rounded-2xl text-lg shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95">
-                        지금 바로 시작하기
+                    <Button className="relative overflow-hidden bg-primary hover:bg-primary/90 text-white font-bold py-4 px-8 rounded-2xl text-lg shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95 group">
+                        <span className="relative z-10">지금 바로 시작하기</span>
+                        <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
                     </Button>
                 </div>
                 {/* Background Decor */}
@@ -210,6 +216,24 @@ export default function DashboardPage() {
                     <div className="absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
                 </div>
             </section>
-        </div>
+
+            {/* Floating Contact Button */}
+            <motion.div
+                className="fixed bottom-8 right-8 z-50"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1 }}
+            >
+                <div className="relative group">
+                    <div className="absolute -top-12 right-0 bg-white px-4 py-2 rounded-xl shadow-lg border border-gray-100 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                        <p className="text-sm font-bold text-accent">궁금한 점이 있으신가요?</p>
+                        <div className="absolute bottom-[-6px] right-6 w-3 h-3 bg-white border-b border-r border-gray-100 transform rotate-45"></div>
+                    </div>
+                    <Button className="w-14 h-14 rounded-full bg-primary text-white shadow-xl hover:bg-primary/90 flex items-center justify-center animate-[float_3s_ease-in-out_infinite]">
+                        <span className="text-2xl">💬</span>
+                    </Button>
+                </div>
+            </motion.div>
+        </div >
     );
 }

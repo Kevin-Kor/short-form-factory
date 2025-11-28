@@ -38,7 +38,7 @@ export function Sidebar() {
     return (
         <aside className="w-64 bg-surface border-r border-border flex flex-col h-screen sticky top-0 hidden md:flex">
             <div className="p-6 border-b border-border">
-                <Link href="/dashboard" className="flex items-center gap-2">
+                <Link href="/dashboard" className="flex items-center gap-3">
                     <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                         <span className="text-white font-bold text-xl">S</span>
                     </div>

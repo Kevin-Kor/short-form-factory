@@ -9,26 +9,35 @@ import {
     FolderOpen,
     Download,
     CreditCard,
-    MessageCircle,
+    MessageSquare, // Changed from MessageCircle
+    Settings, // New import for admin link
     Menu,
     X
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 
-const navigation = [
-    { name: "대시보드", href: "/dashboard", icon: LayoutDashboard },
-    { name: "영상 제작", href: "/order", icon: Video },
-    { name: "내 콘텐츠", href: "/content", icon: FolderOpen },
-    { name: "리소스", href: "/resources", icon: Download },
-    { name: "결제 관리", href: "/payment", icon: CreditCard },
-    { name: "고객 지원", href: "/support", icon: MessageCircle },
-];
+const ADMIN_EMAIL = "manyd950222@gmail.com"; // Admin email constant
 
 export function Sidebar() {
     const pathname = usePathname();
     const [isOpen, setIsOpen] = useState(false);
     const { user, isLoggedIn, logout } = useAuth();
+
+    const isAdmin = user?.email === ADMIN_EMAIL;
+
+    const navItems = [
+        { name: "대시보드", href: "/dashboard", icon: LayoutDashboard },
+        { name: "영상 제작", href: "/order", icon: Video },
+        { name: "내 콘텐츠", href: "/content", icon: FolderOpen },
+        { name: "리소스", href: "/resources", icon: Download },
+        { name: "결제 관리", href: "/payment", icon: CreditCard },
+        { name: "고객 지원", href: "/support", icon: MessageSquare },
+    ];
+
+    if (isAdmin) {
+        navItems.push({ name: "관리자", href: "/admin", icon: Settings });
+    }
 
     return (
         <>
@@ -57,12 +66,13 @@ export function Sidebar() {
 
                     {/* Navigation */}
                     <nav className="flex-1 px-4 py-8 space-y-3 overflow-y-auto">
-                        {navigation.map((item) => {
+                        {navItems.map((item) => {
                             const isActive = pathname.startsWith(item.href);
                             return (
                                 <Link
-                                    key={item.name}
+                                    key={item.href}
                                     href={item.href}
+                                    onClick={() => setIsOpen(false)}
                                     className={cn(
                                         "flex items-center justify-between px-5 py-4 text-sm font-medium rounded-2xl transition-all duration-300 group relative overflow-hidden",
                                         isActive
@@ -115,16 +125,18 @@ export function Sidebar() {
                             </Link>
                         )}
                     </div>
-                </div>
-            </aside>
+                </div >
+            </aside >
 
             {/* Overlay for mobile */}
-            {isOpen && (
-                <div
-                    className="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm md:hidden"
-                    onClick={() => setIsOpen(false)}
-                />
-            )}
+            {
+                isOpen && (
+                    <div
+                        className="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm md:hidden"
+                        onClick={() => setIsOpen(false)}
+                    />
+                )
+            }
         </>
     );
 }

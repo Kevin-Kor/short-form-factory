@@ -95,15 +95,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const signInWithOAuth = async (provider: 'kakao' | 'google' | 'naver') => {
         try {
-            const { error } = await supabase.auth.signInWithOAuth({
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            provider: provider as any,
-            options: {
+            const options: { redirectTo: string; queryParams?: { scope: string } } = {
                 redirectTo: `${window.location.origin}/dashboard`,
-                scopes: provider === 'kakao' ? 'profile_nickname profile_image' : undefined,
-            },
-        });
-        if (error) throw error;
+            };
+            
+            // 카카오는 queryParams로 scope를 완전히 override
+            if (provider === 'kakao') {
+                options.queryParams = {
+                    scope: 'profile_nickname profile_image',
+                };
+            }
+
+            const { error } = await supabase.auth.signInWithOAuth({
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                provider: provider as any,
+                options,
+            });
+            if (error) throw error;
         } catch (error) {
             console.error("OAuth login failed", error);
         }

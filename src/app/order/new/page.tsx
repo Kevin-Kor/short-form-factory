@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
-import { Check, ChevronRight, Upload, Camera, Scissors, Video, Layers, Info } from "lucide-react";
+import { Check, ChevronRight, Upload, Camera, Scissors, Video, Layers, Info, Minus, Plus } from "lucide-react";
 
 const steps = [
     { id: 1, name: "서비스 선택" },
@@ -34,6 +34,7 @@ function OrderForm() {
         // Common
         details: "",
         files: [],
+        quantity: 1,
     });
 
     const [estimatedPrice, setEstimatedPrice] = useState(0);
@@ -72,7 +73,7 @@ function OrderForm() {
             }
         }
 
-        setEstimatedPrice(price);
+        setEstimatedPrice(price * formData.quantity);
     }, [formData]);
 
 
@@ -327,6 +328,29 @@ function OrderForm() {
                                     </div>
                                 </div>
                             )}
+
+                            {/* Quantity Selection */}
+                            <div className="pt-6 border-t border-gray-100">
+                                <h3 className="text-lg font-medium text-accent mb-4">제작 수량</h3>
+                                <div className="flex items-center space-x-4">
+                                    <button
+                                        onClick={() => setFormData(prev => ({ ...prev, quantity: Math.max(1, prev.quantity - 1) }))}
+                                        className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 text-gray-600 transition-colors"
+                                    >
+                                        <Minus size={18} />
+                                    </button>
+                                    <span className="text-xl font-bold text-accent w-12 text-center">{formData.quantity}건</span>
+                                    <button
+                                        onClick={() => setFormData(prev => ({ ...prev, quantity: prev.quantity + 1 }))}
+                                        className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 text-gray-600 transition-colors"
+                                    >
+                                        <Plus size={18} />
+                                    </button>
+                                    <span className="text-sm text-muted ml-2">
+                                        {formData.quantity >= 5 ? "(5건 이상 대량 제작 문의는 고객센터로 연락주세요)" : ""}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     )}
 
@@ -457,6 +481,11 @@ function OrderForm() {
                                         </div>
                                     )}
 
+                                    <div className="flex justify-between text-gray-500">
+                                        <span>제작 수량</span>
+                                        <span className="font-medium text-accent">{formData.quantity}건</span>
+                                    </div>
+
                                     <div className="border-t border-gray-200 my-4 pt-4 flex justify-between items-center">
                                         <span className="text-lg font-bold text-accent">총 결제 금액</span>
                                         <span className="text-2xl font-bold text-primary">{estimatedPrice.toLocaleString()}원</span>
@@ -523,6 +552,10 @@ function OrderForm() {
                             <span className="text-accent font-medium">
                                 {formData.serviceType ? "선택됨" : "-"}
                             </span>
+                        </div>
+                        <div className="flex justify-between text-sm text-gray-500">
+                            <span>수량</span>
+                            <span className="text-accent font-medium">{formData.quantity}건</span>
                         </div>
                         <div className="h-px bg-gray-100" />
                         <div className="flex justify-between items-end">

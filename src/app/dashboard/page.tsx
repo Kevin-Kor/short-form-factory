@@ -38,7 +38,7 @@ export default function DashboardPage() {
                 transition={{ duration: 0.5 }}
                 className="flex justify-between items-center"
             >
-                <h1 className="text-2xl font-bold text-accent">Shortform Factory</h1>
+                <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-500">Shortform Factory</h1>
                 <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
                     <span className="text-xs font-bold text-gray-600">U</span>
                 </div>

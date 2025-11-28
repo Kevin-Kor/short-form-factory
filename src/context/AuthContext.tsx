@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { supabase } from "@/lib/supabase";
-import { User } from "@supabase/supabase-js";
+import { User, AuthError } from "@supabase/supabase-js";
 
 interface RegisterData {
     name: string;
@@ -17,7 +17,7 @@ interface AuthContextType {
     isLoggedIn: boolean;
     isLoading: boolean;
     login: (email: string, password: string) => Promise<boolean>;
-    register: (data: RegisterData) => Promise<boolean>;
+    register: (data: RegisterData) => Promise<{ success: boolean; error?: AuthError | null }>;
     logout: () => Promise<void>;
     signInWithOAuth: (provider: 'kakao' | 'google' | 'naver') => Promise<void>;
 }
@@ -81,10 +81,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 },
             });
             if (error) throw error;
-            return true;
+            return { success: true };
         } catch (error) {
             console.error("Registration failed", error);
-            return false;
+            return { success: false, error: error as AuthError };
         }
     };
 
@@ -98,7 +98,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const options: { redirectTo: string; queryParams?: { scope: string } } = {
                 redirectTo: `${window.location.origin}/dashboard`,
             };
-            
+
             // 카카오는 queryParams로 scope를 완전히 override
             if (provider === 'kakao') {
                 options.queryParams = {

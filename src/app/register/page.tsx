@@ -29,106 +29,107 @@ export default function RegisterPage() {
             return;
         }
 
-        const success = await register(formData);
-        if (success) {
-            router.push("/dashboard");
+        const result = await register(formData);
+        if (result.success) {
+            alert("회원가입이 완료되었습니다! 로그인 페이지로 이동합니다.");
+            router.push("/login");
         } else {
-            alert("회원가입에 실패했습니다.");
+            alert(`회원가입 실패: ${result.error?.message || "알 수 없는 오류가 발생했습니다."}`);
         }
     };
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-[80vh]">
-            <div className="w-full max-w-md bg-surface/50 backdrop-blur-xl p-8 rounded-2xl border border-gray-800 shadow-2xl">
-                <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold text-white mb-2">회원가입</h1>
-                    <p className="text-gray-400">숏폼팩토리의 회원이 되어주세요.</p>
+        <div className="flex flex-col items-center justify-center min-h-[80vh] bg-gray-50">
+            <div className="w-full max-w-md p-8">
+                <div className="text-center mb-10">
+                    <h1 className="text-3xl font-bold text-accent mb-2">회원가입</h1>
+                    <p className="text-muted">숏폼팩토리의 회원이 되어주세요.</p>
                 </div>
 
-                <form onSubmit={handleRegister} className="space-y-4 mb-6">
+                <form onSubmit={handleRegister} className="space-y-5 mb-8">
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-300">이름</label>
+                        <label className="text-sm font-medium text-muted pl-1">이름</label>
                         <div className="relative">
-                            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
+                            <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                             <input
                                 type="text"
                                 name="name"
                                 value={formData.name}
                                 onChange={handleChange}
-                                className="w-full bg-gray-900/50 border border-gray-700 rounded-lg py-3 pl-10 pr-4 text-white focus:outline-none focus:border-primary transition-colors"
+                                className="w-full bg-white border border-gray-200 rounded-xl py-4 pl-12 pr-4 text-accent placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all shadow-sm"
                                 placeholder="홍길동"
                                 required
                             />
                         </div>
                     </div>
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-300">이메일</label>
+                        <label className="text-sm font-medium text-muted pl-1">이메일</label>
                         <div className="relative">
-                            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
+                            <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                             <input
                                 type="email"
                                 name="email"
                                 value={formData.email}
                                 onChange={handleChange}
-                                className="w-full bg-gray-900/50 border border-gray-700 rounded-lg py-3 pl-10 pr-4 text-white focus:outline-none focus:border-primary transition-colors"
+                                className="w-full bg-white border border-gray-200 rounded-xl py-4 pl-12 pr-4 text-accent placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all shadow-sm"
                                 placeholder="name@example.com"
                                 required
                             />
                         </div>
                     </div>
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-300">비밀번호</label>
+                        <label className="text-sm font-medium text-muted pl-1">비밀번호</label>
                         <div className="relative">
-                            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
+                            <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                             <input
                                 type="password"
                                 name="password"
                                 value={formData.password}
                                 onChange={handleChange}
-                                className="w-full bg-gray-900/50 border border-gray-700 rounded-lg py-3 pl-10 pr-4 text-white focus:outline-none focus:border-primary transition-colors"
+                                className="w-full bg-white border border-gray-200 rounded-xl py-4 pl-12 pr-4 text-accent placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all shadow-sm"
                                 placeholder="••••••••"
                                 required
                             />
                         </div>
                     </div>
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-300">비밀번호 확인</label>
+                        <label className="text-sm font-medium text-muted pl-1">비밀번호 확인</label>
                         <div className="relative">
-                            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
+                            <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                             <input
                                 type="password"
                                 name="confirmPassword"
                                 value={formData.confirmPassword}
                                 onChange={handleChange}
-                                className="w-full bg-gray-900/50 border border-gray-700 rounded-lg py-3 pl-10 pr-4 text-white focus:outline-none focus:border-primary transition-colors"
+                                className="w-full bg-white border border-gray-200 rounded-xl py-4 pl-12 pr-4 text-accent placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all shadow-sm"
                                 placeholder="••••••••"
                                 required
                             />
                         </div>
                     </div>
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-300">연락처</label>
+                        <label className="text-sm font-medium text-muted pl-1">연락처</label>
                         <div className="relative">
-                            <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
+                            <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                             <input
                                 type="tel"
                                 name="phone"
                                 value={formData.phone}
                                 onChange={handleChange}
-                                className="w-full bg-gray-900/50 border border-gray-700 rounded-lg py-3 pl-10 pr-4 text-white focus:outline-none focus:border-primary transition-colors"
+                                className="w-full bg-white border border-gray-200 rounded-xl py-4 pl-12 pr-4 text-accent placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all shadow-sm"
                                 placeholder="010-1234-5678"
                                 required
                             />
                         </div>
                     </div>
-                    <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-white py-6 text-lg font-bold mt-4">
+                    <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-white py-6 text-lg font-bold rounded-xl shadow-lg shadow-primary/30 transition-all hover:scale-[1.02] active:scale-[0.98] mt-4">
                         가입하기
                     </Button>
                 </form>
 
-                <div className="mt-6 text-center text-sm text-gray-400">
+                <div className="mt-6 text-center text-sm text-muted">
                     이미 계정이 있으신가요?{" "}
-                    <Link href="/login" className="text-primary hover:underline font-bold">
+                    <Link href="/login" className="text-primary hover:underline font-bold ml-1">
                         로그인
                     </Link>
                 </div>

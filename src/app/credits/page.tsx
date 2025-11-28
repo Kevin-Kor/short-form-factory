@@ -12,7 +12,6 @@ export default function CreditsPage() {
     // const router = useRouter(); // Unused for now
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [history, setHistory] = useState<any[]>([]);
-    const [activeTab, setActiveTab] = useState("requests"); // requests | usage
     const [filterStatus, setFilterStatus] = useState("all"); // all | pending | approved | rejected
     const [loading, setLoading] = useState(true);
     const [balance, setBalance] = useState(0);
@@ -120,10 +119,6 @@ export default function CreditsPage() {
                     <p className="text-sm font-bold text-muted mb-1">현재 잔액</p>
                     <p className="text-3xl font-bold text-blue-600">{formatCurrency(balance)}</p>
                 </div>
-                <div>
-                    <p className="text-sm font-bold text-muted mb-1">광고 환급액</p>
-                    <p className="text-3xl font-bold text-green-600">0원</p>
-                </div>
             </div>
 
             {/* Deposit Info Box */}
@@ -208,18 +203,9 @@ export default function CreditsPage() {
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
                 <div className="flex flex-col md:flex-row justify-between items-center p-4 border-b border-gray-100 gap-4">
                     <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
-                        <button
-                            onClick={() => setActiveTab("requests")}
-                            className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${activeTab === "requests" ? "bg-primary text-white shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
-                        >
+                        <div className="px-4 py-2 rounded-md text-sm font-bold bg-primary text-white shadow-sm">
                             충전 요청 내역 <span className="ml-1 opacity-80 text-xs">{history.length}</span>
-                        </button>
-                        <button
-                            onClick={() => setActiveTab("usage")}
-                            className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${activeTab === "usage" ? "bg-primary text-white shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
-                        >
-                            광고비 사용 내역 <span className="ml-1 opacity-80 text-xs">0</span>
-                        </button>
+                        </div>
                     </div>
 
                     <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">

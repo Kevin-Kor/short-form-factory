@@ -51,7 +51,20 @@ function OrderForm() {
         if (type) {
             setFormData(prev => ({ ...prev, serviceType: type }));
         }
+
+        // Load temp save
+        const savedData = localStorage.getItem("tempOrderData");
+        if (savedData) {
+            if (confirm("임시 저장된 주문 내역이 있습니다. 불러오시겠습니까?")) {
+                setFormData(JSON.parse(savedData));
+            }
+        }
     }, [searchParams]);
+
+    const handleTempSave = () => {
+        localStorage.setItem("tempOrderData", JSON.stringify(formData));
+        alert("주문 내역이 임시 저장되었습니다.\n나중에 다시 방문하시면 이어서 작성하실 수 있습니다.");
+    };
 
     // Price Calculation Logic
     useEffect(() => {
@@ -121,6 +134,7 @@ function OrderForm() {
                 });
 
                 if (res.ok) {
+                    localStorage.removeItem("tempOrderData"); // Clear temp save on success
                     alert("주문이 접수되었습니다! 담당자가 곧 연락드리겠습니다.");
                     router.push("/dashboard");
                 } else {
@@ -553,6 +567,13 @@ function OrderForm() {
                                                     className="w-full bg-red-100 hover:bg-red-200 text-red-700 border border-red-200"
                                                 >
                                                     크레딧 충전하기
+                                                </Button>
+                                                <Button
+                                                    onClick={handleTempSave}
+                                                    variant="outline"
+                                                    className="w-full border-gray-300 text-gray-600 hover:bg-gray-50"
+                                                >
+                                                    현재 내용 임시저장
                                                 </Button>
                                             </div>
                                         )}

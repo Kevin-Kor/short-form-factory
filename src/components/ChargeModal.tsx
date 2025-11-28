@@ -65,7 +65,8 @@ export function ChargeModal({ isOpen, onClose, userId, onChargeComplete }: Charg
                 .from('credit_requests')
                 .insert({
                     user_id: userId,
-                    amount: finalAmount, // Bonus is applied by admin upon approval
+                    amount: finalAmount,
+                    bonus_amount: finalBonus,
                     depositor_name: depositorName,
                     status: 'pending'
                 });

@@ -102,12 +102,15 @@ export default function AdminPage() {
                 if (error) throw error;
                 setUsers(data || []);
             } else if (activeTab === "credits") {
-                const { data, error } = await supabase
+                const { data: credits, error: creditsError } = await supabase
                     .from('credit_requests')
-                    .select('*, user:user_id(email, full_name)')
+                    .select(`
+                    *,
+                    profiles:user_id (email, full_name)
+                `)
                     .order('created_at', { ascending: false });
-                if (error) throw error;
-                setCreditRequests(data || []);
+                if (creditsError) throw creditsError;
+                setCreditRequests(credits || []);
             } else if (activeTab === "business") {
                 const { data, error } = await supabase
                     .from('business_info')
@@ -168,7 +171,7 @@ export default function AdminPage() {
         }
     };
 
-    const handleCreditRequest = async (requestId: string, userId: string, amount: number, action: 'approved' | 'rejected') => {
+    const handleCreditRequest = async (requestId: string, userId: string, amount: number, bonusAmount: number, action: 'approved' | 'rejected') => {
         try {
             if (action === 'approved') {
                 // 1. Update request status
@@ -176,19 +179,23 @@ export default function AdminPage() {
                     .from('credit_requests')
                     .update({ status: 'approved' })
                     .eq('id', requestId);
+
                 if (updateError) throw updateError;
 
-                // 2. Add credits to user profile (RPC would be better for atomicity, but doing client-side for MVP)
-                // First get current balance
-                const { data: profile, error: profileError } = await supabase
+                // 2. Add credit to user (Amount + Bonus)
+                const totalAmount = amount + (bonusAmount || 0);
+
+                // Fetch current balance first to be safe, or use RPC increment if available. 
+                // For now, we fetch and update.
+                const { data: profile, error: fetchError } = await supabase
                     .from('profiles')
                     .select('credit_balance')
                     .eq('id', userId)
                     .single();
 
-                if (profileError) throw profileError;
+                if (fetchError) throw fetchError;
 
-                const newBalance = (profile?.credit_balance || 0) + amount;
+                const newBalance = (profile?.credit_balance || 0) + totalAmount;
 
                 const { error: balanceError } = await supabase
                     .from('profiles')
@@ -196,17 +203,20 @@ export default function AdminPage() {
                     .eq('id', userId);
 
                 if (balanceError) throw balanceError;
+
+                alert(`승인 완료! 사용자에게 총 ${totalAmount.toLocaleString()}원 (충전 ${amount.toLocaleString()} + 보너스 ${(bonusAmount || 0).toLocaleString()})이 지급되었습니다.`);
             } else {
                 const { error } = await supabase
                     .from('credit_requests')
                     .update({ status: 'rejected' })
                     .eq('id', requestId);
+
                 if (error) throw error;
+                alert("거절되었습니다.");
             }
 
-            setCreditRequests(creditRequests.map(req => req.id === requestId ? { ...req, status: action } : req));
-            fetchStats(); // Refresh stats after action
-            alert(`요청이 ${action === 'approved' ? '승인' : '거절'}되었습니다.`);
+            // Refresh Data
+            fetchData();
         } catch (error) {
             console.error("Error handling credit request:", error);
             alert("처리 중 오류가 발생했습니다.");
@@ -452,8 +462,8 @@ export default function AdminPage() {
                                     <tr>
                                         <th className="px-4 py-3 rounded-l-lg">신청일시</th>
                                         <th className="px-4 py-3">회원명</th>
-                                        <th className="px-4 py-3">입금자명</th>
                                         <th className="px-4 py-3">충전금액</th>
+                                        <th className="px-4 py-3">입금자명</th>
                                         <th className="px-4 py-3">상태</th>
                                         <th className="px-4 py-3 rounded-r-lg">관리</th>
                                     </tr>
@@ -462,9 +472,12 @@ export default function AdminPage() {
                                     {creditRequests.map((req) => (
                                         <tr key={req.id} className="hover:bg-gray-50/50 transition-colors">
                                             <td className="px-4 py-3 text-gray-500">{new Date(req.created_at).toLocaleString()}</td>
-                                            <td className="px-4 py-3 font-medium">{req.user?.full_name || req.user?.email || 'Unknown'}</td>
+                                            <td className="px-4 py-3 font-medium">{req.profiles?.full_name || req.profiles?.email || 'Unknown'}</td>
+                                            <td className="px-4 py-3 font-medium text-accent">
+                                                {req.amount.toLocaleString()}원
+                                                {req.bonus_amount > 0 && <span className="text-xs text-green-600 block">(+보너스 {req.bonus_amount.toLocaleString()})</span>}
+                                            </td>
                                             <td className="px-4 py-3">{req.depositor_name}</td>
-                                            <td className="px-4 py-3 font-bold text-blue-600">{req.amount.toLocaleString()}원</td>
                                             <td className="px-4 py-3">
                                                 <span className={`px-2 py-1 rounded-full text-xs font-bold ${req.status === "approved" ? "bg-green-100 text-green-700" :
                                                     req.status === "rejected" ? "bg-red-100 text-red-700" :
@@ -475,29 +488,37 @@ export default function AdminPage() {
                                                     {req.status === "rejected" && "거절됨"}
                                                 </span>
                                             </td>
-                                            <td className="px-4 py-3 flex gap-2">
+                                            <td className="px-4 py-3">
                                                 {req.status === "pending" && (
-                                                    <>
+                                                    <div className="flex space-x-2">
                                                         <button
-                                                            onClick={() => handleCreditRequest(req.id, req.user_id, req.amount, 'approved')}
-                                                            className="px-3 py-1 bg-green-100 text-green-600 rounded-md text-xs hover:bg-green-200"
+                                                            className="px-3 py-1 bg-green-100 text-green-600 rounded-md text-xs hover:bg-green-200 font-medium"
+                                                            onClick={() => handleCreditRequest(req.id, req.user_id, req.amount, req.bonus_amount, 'approved')}
                                                         >
                                                             승인
                                                         </button>
                                                         <button
-                                                            onClick={() => handleCreditRequest(req.id, req.user_id, req.amount, 'rejected')}
-                                                            className="px-3 py-1 bg-red-100 text-red-600 rounded-md text-xs hover:bg-red-200"
+                                                            className="px-3 py-1 bg-gray-100 text-gray-600 rounded-md text-xs hover:bg-gray-200"
+                                                            onClick={() => handleCreditRequest(req.id, req.user_id, req.amount, req.bonus_amount, 'rejected')}
                                                         >
                                                             거절
                                                         </button>
-                                                    </>
+                                                        <button
+                                                            className="px-3 py-1 bg-red-100 text-red-600 rounded-md text-xs hover:bg-red-200"
+                                                            onClick={() => handleDelete('credit_requests', req.id)}
+                                                        >
+                                                            삭제
+                                                        </button>
+                                                    </div>
                                                 )}
-                                                <button
-                                                    className="px-3 py-1 bg-red-100 text-red-600 rounded-md text-xs hover:bg-red-200 ml-2"
-                                                    onClick={() => handleDelete('credit_requests', req.id)}
-                                                >
-                                                    삭제
-                                                </button>
+                                                {req.status !== 'pending' && (
+                                                    <button
+                                                        className="px-3 py-1 bg-red-100 text-red-600 rounded-md text-xs hover:bg-red-200"
+                                                        onClick={() => handleDelete('credit_requests', req.id)}
+                                                    >
+                                                        삭제
+                                                    </button>
+                                                )}
                                             </td>
                                         </tr>
                                     ))}

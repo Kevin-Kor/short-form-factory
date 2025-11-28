@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense, useEffect } from "react";
+import { useState, Suspense, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/Button";
@@ -83,7 +83,7 @@ function OrderForm() {
 
     const { user } = useAuth(); // Get user from auth context
 
-    const fetchCreditBalance = async () => {
+    const fetchCreditBalance = useCallback(async () => {
         if (!user?.id) return;
         setIsLoadingBalance(true);
         try {
@@ -100,13 +100,13 @@ function OrderForm() {
         } finally {
             setIsLoadingBalance(false);
         }
-    };
+    }, [user]);
 
     useEffect(() => {
         if (user?.id) {
             fetchCreditBalance();
         }
-    }, [user]);
+    }, [user, fetchCreditBalance]);
 
     const handleNext = async () => {
         if (currentStep < 4) {
@@ -566,7 +566,6 @@ function OrderForm() {
                         isOpen={isChargeModalOpen}
                         onClose={() => setIsChargeModalOpen(false)}
                         userId={user?.id || ""}
-                        userEmail={user?.email || ""}
                         onChargeComplete={fetchCreditBalance}
                     />
                 </div>

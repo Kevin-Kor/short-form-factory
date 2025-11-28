@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, Check, Copy } from "lucide-react";
+import { X, Copy } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
@@ -10,7 +10,7 @@ interface ChargeModalProps {
     isOpen: boolean;
     onClose: () => void;
     userId: string;
-    userEmail: string;
+    // userEmail: string; // Unused
     onChargeComplete: () => void;
 }
 
@@ -20,7 +20,7 @@ const TIERS = [
     { id: "tier3", amount: 2000000, bonus: 250000, label: "Business" },
 ];
 
-export function ChargeModal({ isOpen, onClose, userId, userEmail, onChargeComplete }: ChargeModalProps) {
+export function ChargeModal({ isOpen, onClose, userId, onChargeComplete }: ChargeModalProps) {
     const [selectedTier, setSelectedTier] = useState<string | null>("tier2");
     const [customAmount, setCustomAmount] = useState("");
     const [isCustom, setIsCustom] = useState(false);
@@ -72,7 +72,7 @@ export function ChargeModal({ isOpen, onClose, userId, userEmail, onChargeComple
 
             if (error) throw error;
 
-            alert("충전 신청이 완료되었습니다! 입금 확인 후 크레딧이 반영됩니다.");
+            alert(`충전 신청이 완료되었습니다!\n(충전금액: ${finalAmount.toLocaleString()}원 + 보너스: ${finalBonus.toLocaleString()}원)\n입금 확인 후 크레딧이 반영됩니다.`);
             onChargeComplete();
             onClose();
         } catch (error) {

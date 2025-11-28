@@ -3,7 +3,181 @@
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/Button";
 import { User, Shield, Building2, CreditCard } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
+
+function BusinessInfoForm({ userId }: { userId: string }) {
+    const [formData, setFormData] = useState({
+        company_name: "",
+        representative_name: "",
+        registration_number: "",
+        address: "",
+        business_type: "",
+        business_item: "",
+        email: ""
+    });
+    const [loading, setLoading] = useState(false);
+    const [fetching, setFetching] = useState(true);
+
+    useEffect(() => {
+        const fetchInfo = async () => {
+            try {
+                const { data } = await supabase
+                    .from('business_info')
+                    .select('*')
+                    .eq('user_id', userId)
+                    .single();
+
+                if (data) {
+                    setFormData({
+                        company_name: data.company_name,
+                        representative_name: data.representative_name,
+                        registration_number: data.registration_number || "",
+                        address: data.address || "",
+                        business_type: data.business_type || "",
+                        business_item: data.business_item || "",
+                        email: data.email || ""
+                    });
+                }
+            } catch {
+                // Ignore error if no data found
+            } finally {
+                setFetching(false);
+            }
+        };
+        fetchInfo();
+    }, [userId]);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            // Check if exists
+            const { data: existing } = await supabase
+                .from('business_info')
+                .select('id')
+                .eq('user_id', userId)
+                .single();
+
+            if (existing) {
+                const { error } = await supabase
+                    .from('business_info')
+                    .update(formData)
+                    .eq('user_id', userId);
+                if (error) throw error;
+            } else {
+                const { error } = await supabase
+                    .from('business_info')
+                    .insert({ ...formData, user_id: userId });
+                if (error) throw error;
+            }
+            alert("사업자 정보가 저장되었습니다.");
+        } catch (error) {
+            console.error("Error saving business info:", error);
+            alert("저장 중 오류가 발생했습니다.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (fetching) return <div className="text-center py-8">로딩 중...</div>;
+
+    return (
+        <form className="space-y-6" onSubmit={handleSubmit}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                    <label className="text-sm font-bold text-accent">상호명 (법인명)</label>
+                    <input
+                        name="company_name"
+                        value={formData.company_name}
+                        onChange={handleChange}
+                        type="text"
+                        required
+                        className="w-full bg-white border border-gray-200 rounded-xl p-3 text-accent focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                        placeholder="예: 숏폼팩토리"
+                    />
+                </div>
+                <div className="space-y-2">
+                    <label className="text-sm font-bold text-accent">대표자명</label>
+                    <input
+                        name="representative_name"
+                        value={formData.representative_name}
+                        onChange={handleChange}
+                        type="text"
+                        required
+                        className="w-full bg-white border border-gray-200 rounded-xl p-3 text-accent focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                        placeholder="예: 홍길동"
+                    />
+                </div>
+                <div className="space-y-2">
+                    <label className="text-sm font-bold text-accent">사업자등록번호</label>
+                    <input
+                        name="registration_number"
+                        value={formData.registration_number}
+                        onChange={handleChange}
+                        type="text"
+                        className="w-full bg-white border border-gray-200 rounded-xl p-3 text-accent focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                        placeholder="000-00-00000"
+                    />
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                    <label className="text-sm font-bold text-accent">사업장 주소</label>
+                    <input
+                        name="address"
+                        value={formData.address}
+                        onChange={handleChange}
+                        type="text"
+                        className="w-full bg-white border border-gray-200 rounded-xl p-3 text-accent focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                        placeholder="주소를 입력해주세요"
+                    />
+                </div>
+                <div className="space-y-2">
+                    <label className="text-sm font-bold text-accent">업태</label>
+                    <input
+                        name="business_type"
+                        value={formData.business_type}
+                        onChange={handleChange}
+                        type="text"
+                        className="w-full bg-white border border-gray-200 rounded-xl p-3 text-accent focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                        placeholder="예: 서비스업"
+                    />
+                </div>
+                <div className="space-y-2">
+                    <label className="text-sm font-bold text-accent">종목</label>
+                    <input
+                        name="business_item"
+                        value={formData.business_item}
+                        onChange={handleChange}
+                        type="text"
+                        className="w-full bg-white border border-gray-200 rounded-xl p-3 text-accent focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                        placeholder="예: 영상제작"
+                    />
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                    <label className="text-sm font-bold text-accent">세금계산서 수신 이메일</label>
+                    <input
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        type="email"
+                        className="w-full bg-white border border-gray-200 rounded-xl p-3 text-accent focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                        placeholder="tax@example.com"
+                    />
+                </div>
+            </div>
+
+            <div className="pt-4 flex justify-end">
+                <Button disabled={loading} className="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-8 rounded-xl shadow-lg shadow-primary/20">
+                    {loading ? "저장 중..." : "저장하기"}
+                </Button>
+            </div>
+        </form>
+    );
+}
 
 export default function ProfilePage() {
     const { user } = useAuth();
@@ -149,48 +323,7 @@ export default function ProfilePage() {
                             <p className="text-sm text-muted">세금계산서 발행을 위한 사업자 정보를 등록해주세요.</p>
                         </div>
 
-                        <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-bold text-accent">상호명 (법인명)</label>
-                                    <input type="text" className="w-full bg-white border border-gray-200 rounded-xl p-3 text-accent focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all" placeholder="예: 숏폼팩토리" />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-bold text-accent">대표자명</label>
-                                    <input type="text" className="w-full bg-white border border-gray-200 rounded-xl p-3 text-accent focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all" placeholder="예: 홍길동" />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-bold text-accent">사업자등록번호</label>
-                                    <input type="text" className="w-full bg-white border border-gray-200 rounded-xl p-3 text-accent focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all" placeholder="000-00-00000" />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-bold text-accent">법인등록번호 (선택)</label>
-                                    <input type="text" className="w-full bg-white border border-gray-200 rounded-xl p-3 text-accent focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all" placeholder="000000-0000000" />
-                                </div>
-                                <div className="space-y-2 md:col-span-2">
-                                    <label className="text-sm font-bold text-accent">사업장 주소</label>
-                                    <input type="text" className="w-full bg-white border border-gray-200 rounded-xl p-3 text-accent focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all" placeholder="주소를 입력해주세요" />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-bold text-accent">업태</label>
-                                    <input type="text" className="w-full bg-white border border-gray-200 rounded-xl p-3 text-accent focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all" placeholder="예: 서비스업" />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-bold text-accent">종목</label>
-                                    <input type="text" className="w-full bg-white border border-gray-200 rounded-xl p-3 text-accent focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all" placeholder="예: 영상제작" />
-                                </div>
-                                <div className="space-y-2 md:col-span-2">
-                                    <label className="text-sm font-bold text-accent">세금계산서 수신 이메일</label>
-                                    <input type="email" className="w-full bg-white border border-gray-200 rounded-xl p-3 text-accent focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all" placeholder="tax@example.com" />
-                                </div>
-                            </div>
-
-                            <div className="pt-4 flex justify-end">
-                                <Button className="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-8 rounded-xl shadow-lg shadow-primary/20">
-                                    저장하기
-                                </Button>
-                            </div>
-                        </form>
+                        <BusinessInfoForm userId={user.id} />
                     </div>
                 )}
             </div>

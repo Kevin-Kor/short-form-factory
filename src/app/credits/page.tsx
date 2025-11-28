@@ -1,41 +1,108 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/Button";
 import { CreditCard, Landmark, Plus, Info } from "lucide-react";
-
-// Mock data for credit history
-const mockHistory = [
-    {
-        id: 1,
-        date: "2024-11-28 17:34",
-        amount: 300000,
-        depositAmount: 330000,
-        depositor: "강미정",
-        status: "approved",
-        business: "테판쉐프"
-    },
-    {
-        id: 2,
-        date: "2024-11-29 10:00",
-        amount: 500000,
-        depositAmount: 550000,
-        depositor: "김철수",
-        status: "pending",
-        business: "김철수스튜디오"
-    }
-];
+import { useAuth } from "@/context/AuthContext";
+// import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 
 export default function CreditsPage() {
+    const { user, isLoggedIn } = useAuth();
+    // const router = useRouter(); // Unused for now
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [history, setHistory] = useState<any[]>([]);
     const [activeTab, setActiveTab] = useState("requests"); // requests | usage
     const [filterStatus, setFilterStatus] = useState("all"); // all | pending | approved | rejected
+    const [loading, setLoading] = useState(true);
+    const [balance, setBalance] = useState(0);
+
+    // Form state
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [amount, setAmount] = useState("");
+    const [depositorName, setDepositorName] = useState("");
+    const [submitting, setSubmitting] = useState(false);
+
+    const fetchData = useCallback(async () => {
+        setLoading(true);
+        try {
+            // Fetch profile for balance
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('credit_balance')
+                .eq('id', user!.id)
+                .single();
+
+            if (profile) {
+                setBalance(profile.credit_balance || 0);
+            }
+
+            // Fetch credit requests
+            const { data: requests, error } = await supabase
+                .from('credit_requests')
+                .select('*')
+                .eq('user_id', user!.id)
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+            setHistory(requests || []);
+        } catch (error) {
+            console.error("Error fetching credits data:", error);
+        } finally {
+            setLoading(false);
+        }
+    }, [user]);
+
+    useEffect(() => {
+        if (isLoggedIn && user) {
+            fetchData();
+        } else if (!isLoggedIn) {
+            // router.push("/login"); // Optional: redirect if not logged in
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user, isLoggedIn, fetchData]);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!amount || !depositorName) return;
+
+        setSubmitting(true);
+        try {
+            const { error } = await supabase
+                .from('credit_requests')
+                .insert({
+                    user_id: user!.id,
+                    amount: parseInt(amount.replace(/,/g, '')),
+                    depositor_name: depositorName,
+                    status: 'pending'
+                });
+
+            if (error) throw error;
+
+            alert("충전 요청이 접수되었습니다. 입금이 확인되면 크레딧이 충전됩니다.");
+            setIsModalOpen(false);
+            setAmount("");
+            setDepositorName("");
+            fetchData(); // Refresh list
+        } catch (error) {
+            console.error("Error submitting request:", error);
+            alert("요청 제출 중 오류가 발생했습니다.");
+        } finally {
+            setSubmitting(false);
+        }
+    };
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('ko-KR', { style: 'currency', currency: 'KRW' }).format(amount).replace('₩', '') + '원';
     };
 
+    const filteredHistory = history.filter(item => {
+        if (filterStatus === "all") return true;
+        return item.status === filterStatus;
+    });
+
     return (
-        <div className="max-w-6xl mx-auto space-y-8">
+        <div className="max-w-6xl mx-auto space-y-8 relative">
             {/* Header */}
             <div>
                 <div className="flex items-center gap-3 mb-2">
@@ -51,7 +118,7 @@ export default function CreditsPage() {
             <div className="flex gap-12">
                 <div>
                     <p className="text-sm font-bold text-muted mb-1">현재 잔액</p>
-                    <p className="text-3xl font-bold text-blue-600">0원</p>
+                    <p className="text-3xl font-bold text-blue-600">{formatCurrency(balance)}</p>
                 </div>
                 <div>
                     <p className="text-sm font-bold text-muted mb-1">광고 환급액</p>
@@ -88,10 +155,54 @@ export default function CreditsPage() {
             </div>
 
             {/* Action Button */}
-            <Button className="w-full bg-primary hover:bg-primary/90 text-white py-6 rounded-xl font-bold text-lg shadow-lg shadow-primary/20 flex items-center justify-center gap-2">
+            <Button
+                onClick={() => setIsModalOpen(true)}
+                className="w-full bg-primary hover:bg-primary/90 text-white py-6 rounded-xl font-bold text-lg shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
+            >
                 <Plus size={20} />
                 크레딧 신청 / 충전 요청
             </Button>
+
+            {/* Request Modal */}
+            {isModalOpen && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl w-full max-w-md p-6 space-y-6">
+                        <h3 className="text-xl font-bold text-accent">크레딧 충전 신청</h3>
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-1">충전 금액</label>
+                                <input
+                                    type="number"
+                                    value={amount}
+                                    onChange={(e) => setAmount(e.target.value)}
+                                    placeholder="금액을 입력하세요"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-1">입금자명</label>
+                                <input
+                                    type="text"
+                                    value={depositorName}
+                                    onChange={(e) => setDepositorName(e.target.value)}
+                                    placeholder="입금자명을 입력하세요"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                                    required
+                                />
+                            </div>
+                            <div className="flex gap-2 pt-2">
+                                <Button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 bg-gray-100 text-gray-700 hover:bg-gray-200">
+                                    취소
+                                </Button>
+                                <Button type="submit" disabled={submitting} className="flex-1 bg-primary text-white hover:bg-primary/90">
+                                    {submitting ? "신청 중..." : "신청하기"}
+                                </Button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
 
             {/* History Section */}
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
@@ -101,7 +212,7 @@ export default function CreditsPage() {
                             onClick={() => setActiveTab("requests")}
                             className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${activeTab === "requests" ? "bg-primary text-white shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
                         >
-                            충전 요청 내역 <span className="ml-1 opacity-80 text-xs">2</span>
+                            충전 요청 내역 <span className="ml-1 opacity-80 text-xs">{history.length}</span>
                         </button>
                         <button
                             onClick={() => setActiveTab("usage")}
@@ -133,32 +244,38 @@ export default function CreditsPage() {
                             <tr>
                                 <th className="px-6 py-4">신청일시</th>
                                 <th className="px-6 py-4">충전금액</th>
-                                <th className="px-6 py-4">입금금액</th>
                                 <th className="px-6 py-4">입금자명</th>
                                 <th className="px-6 py-4">처리상태</th>
-                                <th className="px-6 py-4">사업자 정보</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
-                            {mockHistory.map((item) => (
-                                <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
-                                    <td className="px-6 py-4 text-gray-600">{item.date}</td>
-                                    <td className="px-6 py-4 font-bold text-blue-600">{formatCurrency(item.amount)}</td>
-                                    <td className="px-6 py-4 font-bold text-green-600">{formatCurrency(item.depositAmount)}</td>
-                                    <td className="px-6 py-4 text-gray-600">{item.depositor}</td>
-                                    <td className="px-6 py-4">
-                                        <span className={`px-2 py-1 rounded-full text-xs font-bold ${item.status === "approved" ? "bg-green-100 text-green-700" :
+                            {loading ? (
+                                <tr>
+                                    <td colSpan={4} className="text-center py-8 text-muted">로딩 중...</td>
+                                </tr>
+                            ) : filteredHistory.length === 0 ? (
+                                <tr>
+                                    <td colSpan={4} className="text-center py-8 text-muted">내역이 없습니다.</td>
+                                </tr>
+                            ) : (
+                                filteredHistory.map((item) => (
+                                    <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
+                                        <td className="px-6 py-4 text-gray-600">{new Date(item.created_at).toLocaleString()}</td>
+                                        <td className="px-6 py-4 font-bold text-blue-600">{formatCurrency(item.amount)}</td>
+                                        <td className="px-6 py-4 text-gray-600">{item.depositor_name}</td>
+                                        <td className="px-6 py-4">
+                                            <span className={`px-2 py-1 rounded-full text-xs font-bold ${item.status === "approved" ? "bg-green-100 text-green-700" :
                                                 item.status === "pending" ? "bg-yellow-100 text-yellow-700" :
                                                     "bg-red-100 text-red-700"
-                                            }`}>
-                                            {item.status === "approved" && "승인됨"}
-                                            {item.status === "pending" && "대기중"}
-                                            {item.status === "rejected" && "거부됨"}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 text-gray-600">{item.business}</td>
-                                </tr>
-                            ))}
+                                                }`}>
+                                                {item.status === "approved" && "승인됨"}
+                                                {item.status === "pending" && "대기중"}
+                                                {item.status === "rejected" && "거부됨"}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
                         </tbody>
                     </table>
                 </div>

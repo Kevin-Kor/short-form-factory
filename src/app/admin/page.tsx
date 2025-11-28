@@ -141,6 +141,33 @@ export default function AdminPage() {
         }
     };
 
+    const handleManualCreditUpdate = async (userId: string, currentBalance: number) => {
+        const amountStr = prompt("추가하거나 차감할 금액을 입력하세요 (예: 10000 또는 -5000):");
+        if (!amountStr) return;
+
+        const amount = parseInt(amountStr, 10);
+        if (isNaN(amount)) {
+            alert("유효한 숫자를 입력해주세요.");
+            return;
+        }
+
+        try {
+            const newBalance = currentBalance + amount;
+            const { error } = await supabase
+                .from('profiles')
+                .update({ credit_balance: newBalance })
+                .eq('id', userId);
+
+            if (error) throw error;
+
+            setUsers(users.map(u => u.id === userId ? { ...u, credit_balance: newBalance } : u));
+            alert(`크레딧이 수정되었습니다. (현재 잔액: ${newBalance.toLocaleString()}원)`);
+        } catch (error) {
+            console.error("Error updating credit:", error);
+            alert("크레딧 수정 중 오류가 발생했습니다.");
+        }
+    };
+
     const handleCreditRequest = async (requestId: string, userId: string, amount: number, action: 'approved' | 'rejected') => {
         try {
             if (action === 'approved') {
@@ -264,7 +291,7 @@ export default function AdminPage() {
                             <CreditCard size={24} />
                         </div>
                         <div>
-                            <p className="text-sm font-medium text-muted">크레딧 충전 대기</p>
+                            <p className="text-sm font-medium text-muted">입금 신청 대기</p>
                             <h3 className="text-2xl font-bold text-accent">{stats.pendingCreditsCount}건</h3>
                         </div>
                     </div>
@@ -292,7 +319,7 @@ export default function AdminPage() {
                     >
                         {tab === "orders" && "주문 관리"}
                         {tab === "users" && "회원 관리"}
-                        {tab === "credits" && "크레딧 관리"}
+                        {tab === "credits" && "입금 신청 관리"}
                         {tab === "business" && "사업자 정보"}
                     </button>
                 ))}
@@ -396,6 +423,12 @@ export default function AdminPage() {
                                             <td className="px-4 py-3 text-gray-500">{new Date(u.created_at).toLocaleDateString()}</td>
                                             <td className="px-4 py-3">
                                                 <button
+                                                    className="px-3 py-1 bg-blue-50 text-blue-600 rounded-md text-xs hover:bg-blue-100 mr-2"
+                                                    onClick={() => handleManualCreditUpdate(u.id, u.credit_balance || 0)}
+                                                >
+                                                    크레딧 수정
+                                                </button>
+                                                <button
                                                     className="px-3 py-1 bg-red-100 text-red-600 rounded-md text-xs hover:bg-red-200"
                                                     onClick={() => handleDelete('profiles', u.id)}
                                                 >
@@ -412,7 +445,7 @@ export default function AdminPage() {
 
                 {activeTab === "credits" && (
                     <div className="p-6">
-                        <h3 className="text-lg font-bold text-accent mb-4">크레딧 충전 요청</h3>
+                        <h3 className="text-lg font-bold text-accent mb-4">입금 신청 관리</h3>
                         <div className="overflow-x-auto">
                             <table className="w-full text-sm text-left">
                                 <thead className="bg-gray-50 text-gray-500 font-medium">

@@ -5,7 +5,9 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
-import { Check, ChevronRight, Camera, Scissors, Video, Layers, Info, Minus, Plus } from "lucide-react";
+import { Check, ChevronRight, Camera, Scissors, Video, Layers, Info, Minus, Plus, Wallet, AlertCircle } from "lucide-react";
+import { supabase } from "@/lib/supabase";
+import { ChargeModal } from "@/components/ChargeModal";
 
 const steps = [
     { id: 1, name: "서비스 선택" },
@@ -37,6 +39,9 @@ function OrderForm() {
     });
 
     const [estimatedPrice, setEstimatedPrice] = useState(0);
+    const [creditBalance, setCreditBalance] = useState(0);
+    const [isChargeModalOpen, setIsChargeModalOpen] = useState(false);
+    const [isLoadingBalance, setIsLoadingBalance] = useState(false);
 
     const router = useRouter();
 
@@ -77,6 +82,31 @@ function OrderForm() {
 
 
     const { user } = useAuth(); // Get user from auth context
+
+    const fetchCreditBalance = async () => {
+        if (!user?.id) return;
+        setIsLoadingBalance(true);
+        try {
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('credit_balance')
+                .eq('id', user.id)
+                .single();
+
+            if (error) throw error;
+            setCreditBalance(data?.credit_balance || 0);
+        } catch (error) {
+            console.error("Error fetching credit balance:", error);
+        } finally {
+            setIsLoadingBalance(false);
+        }
+    };
+
+    useEffect(() => {
+        if (user?.id) {
+            fetchCreditBalance();
+        }
+    }, [user]);
 
     const handleNext = async () => {
         if (currentStep < 4) {
@@ -480,27 +510,65 @@ function OrderForm() {
                             </div>
 
                             <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
-                                <h3 className="text-lg font-bold text-accent mb-4">입금 계좌 안내</h3>
-                                <div className="flex items-center justify-between bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
-                                    <div className="flex items-center space-x-3">
-                                        <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center text-black font-bold text-xs">
-                                            KB
-                                        </div>
-                                        <div>
-                                            <p className="text-sm text-gray-500">국민은행</p>
-                                            <p className="text-lg font-bold text-accent">1234-56-789012</p>
-                                            <p className="text-sm text-gray-500">예금주: 숏폼팩토리</p>
-                                        </div>
+                                <h3 className="text-lg font-bold text-accent mb-4 flex items-center">
+                                    <Wallet className="mr-2 text-primary" size={20} />
+                                    결제 및 크레딧
+                                </h3>
+
+                                <div className="space-y-4">
+                                    <div className="flex justify-between items-center bg-white p-4 rounded-lg border border-gray-200">
+                                        <span className="text-gray-600">보유 크레딧</span>
+                                        <span className="text-xl font-bold text-primary">
+                                            {isLoadingBalance ? "..." : creditBalance.toLocaleString()}원
+                                        </span>
                                     </div>
-                                    <Button variant="outline" size="sm" className="text-xs border-gray-300">복사하기</Button>
+
+                                    <div className="flex justify-between items-center p-4 rounded-lg bg-white border border-gray-200">
+                                        <span className="text-gray-600">결제 예정 금액</span>
+                                        <span className="text-xl font-bold text-accent">{estimatedPrice.toLocaleString()}원</span>
+                                    </div>
+
+                                    <div className="border-t border-gray-200 pt-4">
+                                        <div className="flex justify-between items-center mb-4">
+                                            <span className="font-bold text-gray-700">결제 후 잔액</span>
+                                            <span className={cn(
+                                                "text-xl font-bold",
+                                                creditBalance - estimatedPrice >= 0 ? "text-blue-600" : "text-red-600"
+                                            )}>
+                                                {(creditBalance - estimatedPrice).toLocaleString()}원
+                                            </span>
+                                        </div>
+
+                                        {creditBalance < estimatedPrice && (
+                                            <div className="bg-red-50 border border-red-100 rounded-lg p-4 space-y-3">
+                                                <div className="flex items-start text-red-600 text-sm">
+                                                    <AlertCircle size={16} className="mr-2 mt-0.5 flex-shrink-0" />
+                                                    <span>
+                                                        크레딧이 <strong>{(estimatedPrice - creditBalance).toLocaleString()}원</strong> 부족합니다.<br />
+                                                        충전 후 주문을 완료해주세요.
+                                                    </span>
+                                                </div>
+                                                <Button
+                                                    onClick={() => setIsChargeModalOpen(true)}
+                                                    className="w-full bg-red-100 hover:bg-red-200 text-red-700 border border-red-200"
+                                                >
+                                                    크레딧 충전하기
+                                                </Button>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
-                                <p className="text-xs text-gray-400 mt-4">
-                                    * 입금 확인 후 담당자가 배정되며 제작이 시작됩니다.<br />
-                                    * 세금계산서 발행을 원하시면 고객센터로 문의해주세요.
-                                </p>
                             </div>
                         </div>
                     )}
+
+                    <ChargeModal
+                        isOpen={isChargeModalOpen}
+                        onClose={() => setIsChargeModalOpen(false)}
+                        userId={user?.id || ""}
+                        userEmail={user?.email || ""}
+                        onChargeComplete={fetchCreditBalance}
+                    />
                 </div>
 
                 {/* Navigation Buttons */}
@@ -519,8 +587,17 @@ function OrderForm() {
                             다음 단계 <ChevronRight size={16} className="ml-2" />
                         </Button>
                     ) : (
-                        <Button onClick={handleNext} className="bg-primary hover:bg-primary/90 text-white font-bold shadow-lg shadow-primary/20">
-                            입금 완료 신청
+                        <Button
+                            onClick={handleNext}
+                            disabled={creditBalance < estimatedPrice}
+                            className={cn(
+                                "text-white font-bold shadow-lg",
+                                creditBalance < estimatedPrice
+                                    ? "bg-gray-400 cursor-not-allowed"
+                                    : "bg-primary hover:bg-primary/90 shadow-primary/20"
+                            )}
+                        >
+                            {creditBalance < estimatedPrice ? "잔액 부족" : "결제 및 주문 완료"}
                         </Button>
                     )}
                 </div>

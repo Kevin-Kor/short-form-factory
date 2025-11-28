@@ -9,26 +9,14 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        primary: {
-          DEFAULT: "#8B5CF6", // Violet-500 (Softer Purple)
-          foreground: "#FFFFFF",
-        },
-        secondary: {
-          DEFAULT: "#D946EF", // Fuchsia-500 (Vibrant Pink)
-          foreground: "#FFFFFF",
-        },
-        accent: {
-          DEFAULT: "#34D399", // Emerald-400 (Fresh Green)
-          foreground: "#000000",
-        },
-        background: {
-          DEFAULT: "#0B0F19", // Deep Dark Blue/Black
-          light: "#F8FAFC",
-        },
-        surface: {
-          DEFAULT: "#151B2B", // Slightly lighter dark
-          light: "#FFFFFF",
-        }
+        // Apple/Toss Style Palette
+        background: "#F2F4F6", // Light gray background (Toss style)
+        surface: "#FFFFFF",    // Pure white surface
+        primary: "#3182F6",    // Toss Blue
+        secondary: "#B1C5D8",  // Soft Blue Gray
+        accent: "#333D4B",     // Dark Text (Almost Black)
+        muted: "#8B95A1",      // Muted Text (Gray)
+        border: "#E5E8EB",     // Light Border
       },
     },
   },

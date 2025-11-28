@@ -15,28 +15,25 @@ export default function OrderIndexPage() {
                     description="전문 장비와 인력을 통한 고퀄리티 영상 촬영 서비스"
                     icon={Camera}
                     href="/order/new?type=shooting"
-                    color="bg-blue-600"
                 />
                 <ServiceCard
                     title="편집"
                     description="원본 영상을 트렌디한 숏폼으로 재탄생시키는 편집 서비스"
                     icon={Scissors}
                     href="/order/new?type=editing"
-                    color="bg-pink-600"
                 />
                 <ServiceCard
                     title="촬영 + 편집"
-                    description="기획된 내용을 바탕으로 촬영부터 편집까지 한 번에"
+                    description="기획해주신 내용을 바탕으로 촬영부터 편집까지 깔끔하게 제작해드립니다."
                     icon={Video}
                     href="/order/new?type=shooting_editing"
-                    color="bg-purple-600"
                 />
                 <ServiceCard
                     title="올인원"
-                    description="기획부터 촬영, 편집, 업로드까지 전담 마크"
+                    description="기획부터 촬영, 편집, 업로드까지! 전담 PD가 알아서 다 해드립니다."
                     icon={Layers}
                     href="/order/new?type=all_in_one"
-                    color="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500"
+                    badge="추천"
                 />
             </div>
         </div>

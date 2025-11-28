@@ -1,44 +1,35 @@
 import { LucideIcon } from "lucide-react";
-import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/Button";
 
 interface ServiceCardProps {
     title: string;
     description: string;
     icon: LucideIcon;
     href: string;
-    color: string;
     badge?: string;
 }
 
-export function ServiceCard({ title, description, icon: Icon, href, color, badge }: ServiceCardProps) {
+export function ServiceCard({ title, description, icon: Icon, href, badge }: ServiceCardProps) {
     return (
-        <div className={cn(
-            "bg-surface/50 backdrop-blur-sm p-6 rounded-2xl border transition-all duration-300 group hover:shadow-lg hover:-translate-y-1 relative overflow-hidden flex flex-col h-full",
-            badge ? "border-primary/50 shadow-primary/5" : "border-gray-800 hover:border-primary/50 hover:shadow-primary/10"
-        )}>
-            {badge && (
-                <div className="absolute top-0 right-0 bg-primary text-white text-xs font-bold px-3 py-1 rounded-bl-xl shadow-lg z-10">
-                    {badge}
+        <div className="bg-surface rounded-2xl p-6 border border-border shadow-sm hover:shadow-md transition-all duration-300 flex flex-col h-full group">
+            <div className="flex justify-between items-start mb-4">
+                <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center bg-blue-50 text-primary group-hover:scale-110 transition-transform duration-300")}>
+                    <Icon size={24} />
                 </div>
-            )}
-            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 shadow-lg ${color} group-hover:scale-110 transition-transform duration-300 shrink-0`}>
-                <Icon className="w-7 h-7 text-white" />
+                {badge && (
+                    <span className="bg-primary text-white text-[10px] font-bold px-2 py-1 rounded-full">
+                        {badge}
+                    </span>
+                )}
             </div>
-            <h3 className="text-xl font-bold mb-3 text-white group-hover:text-primary transition-colors">
-                {title}
-            </h3>
-            <p className="text-gray-400 mb-8 text-sm leading-relaxed flex-1">
-                {description}
-            </p>
-            <Link href={href} className="mt-auto w-full">
-                <Button variant="outline" className={cn(
-                    "w-full transition-all duration-300 font-semibold py-6",
-                    badge
-                        ? "bg-primary text-white border-primary hover:bg-primary/90 shadow-lg shadow-primary/20"
-                        : "bg-white/5 border-white/10 text-gray-300 hover:bg-primary hover:border-primary hover:text-white hover:shadow-lg hover:shadow-primary/20"
-                )}>
+
+            <h3 className="text-xl font-bold text-accent mb-2 group-hover:text-primary transition-colors">{title}</h3>
+            <p className="text-muted text-sm mb-6 flex-1 leading-relaxed">{description}</p>
+
+            <Link href={href} className="w-full">
+                <Button variant="outline" className="w-full border-primary text-primary hover:bg-primary hover:text-white transition-all duration-300 rounded-xl py-5 font-bold">
                     신청하기
                 </Button>
             </Link>

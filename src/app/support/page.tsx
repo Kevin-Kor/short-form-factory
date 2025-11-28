@@ -42,7 +42,10 @@ export default function SupportPage() {
                     <h1 className="text-3xl font-bold text-accent">고객 지원</h1>
                     <p className="text-muted">AI 챗봇에게 궁금한 점을 물어보세요.</p>
                 </div>
-                <Button className="bg-[#FAE100] text-[#371D1E] hover:bg-[#FAE100]/90 font-bold">
+                <Button
+                    onClick={() => window.open('http://pf.kakao.com/_xnqXVn/chat', '_blank')}
+                    className="bg-[#FAE100] text-[#371D1E] hover:bg-[#FAE100]/90 font-bold"
+                >
                     카카오톡 상담하기
                 </Button>
             </div>

@@ -234,7 +234,10 @@ export default function DashboardPage() {
                         <p className="text-sm font-bold text-accent">궁금한 점이 있으신가요?</p>
                         <div className="absolute bottom-[-6px] right-6 w-3 h-3 bg-white border-b border-r border-gray-100 transform rotate-45"></div>
                     </div>
-                    <Button className="w-14 h-14 rounded-full bg-primary text-white shadow-xl hover:bg-primary/90 flex items-center justify-center animate-[float_3s_ease-in-out_infinite]">
+                    <Button
+                        onClick={() => window.open('http://pf.kakao.com/_xnqXVn/chat', '_blank')}
+                        className="w-14 h-14 rounded-full bg-primary text-white shadow-xl hover:bg-primary/90 flex items-center justify-center animate-[float_3s_ease-in-out_infinite]"
+                    >
                         <span className="text-2xl">💬</span>
                     </Button>
                 </div>

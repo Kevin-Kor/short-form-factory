@@ -20,6 +20,7 @@ interface AuthContextType {
     register: (data: RegisterData) => Promise<{ success: boolean; error?: AuthError | null }>;
     logout: () => Promise<void>;
     signInWithOAuth: (provider: 'kakao' | 'google' | 'naver') => Promise<void>;
+    resetPassword: (email: string) => Promise<{ success: boolean; error?: AuthError | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -117,8 +118,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     };
 
+    const resetPassword = async (email: string) => {
+        try {
+            const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: `${window.location.origin}/update-password`,
+            });
+            if (error) throw error;
+            return { success: true };
+        } catch (error) {
+            console.error("Password reset failed", error);
+            return { success: false, error: error as AuthError };
+        }
+    };
+
     return (
-        <AuthContext.Provider value={{ user, isLoggedIn: !!user, isLoading, login, register, logout, signInWithOAuth }}>
+        <AuthContext.Provider value={{ user, isLoggedIn: !!user, isLoading, login, register, logout, signInWithOAuth, resetPassword }}>
             {children}
         </AuthContext.Provider>
     );

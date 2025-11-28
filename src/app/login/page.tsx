@@ -76,20 +76,13 @@ export default function LoginPage() {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 gap-3">
                     <button
                         type="button"
                         onClick={() => signInWithOAuth('kakao')}
                         className="flex items-center justify-center bg-[#FEE500] hover:bg-[#FEE500]/90 text-black py-3 rounded-lg font-medium transition-colors"
                     >
                         K
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => signInWithOAuth('naver')}
-                        className="flex items-center justify-center bg-[#03C75A] hover:bg-[#03C75A]/90 text-white py-3 rounded-lg font-medium transition-colors"
-                    >
-                        N
                     </button>
                     <button
                         type="button"

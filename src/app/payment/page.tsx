@@ -1,19 +1,39 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { supabase } from "@/lib/supabase";
 import { History, Wallet, Lock } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 
 export default function PaymentPage() {
     const { user, isLoggedIn } = useAuth();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [orders, setOrders] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    // Optional: Redirect if not logged in (or just show a different UI)
-    // useEffect(() => {
-    //     if (!isLoggedIn) {
-    //         router.push("/login");
-    //     }
-    // }, [isLoggedIn, router]);
+    useEffect(() => {
+        if (user) {
+            const fetchOrders = async () => {
+                try {
+                    const { data, error } = await supabase
+                        .from('orders')
+                        .select('*')
+                        .eq('user_id', user.id)
+                        .order('created_at', { ascending: false });
+
+                    if (error) throw error;
+                    setOrders(data || []);
+                } catch (error) {
+                    console.error("Error fetching orders:", error);
+                } finally {
+                    setLoading(false);
+                }
+            };
+            fetchOrders();
+        }
+    }, [user]);
 
     if (!isLoggedIn) {
         return (
@@ -84,29 +104,34 @@ export default function PaymentPage() {
                     </h2>
 
                     <div className="space-y-4">
-                        {/* Mock Data for Demo */}
-                        {[1, 2].map((item) => (
-                            <div key={item} className="flex justify-between items-center p-4 bg-gray-800 rounded-lg">
-                                <div>
-                                    <p className="text-white font-medium">프로젝트 #{100 + item} 착수금</p>
-                                    <p className="text-xs text-gray-400">2024.05.{10 + item}</p>
+                        {loading ? (
+                            <p className="text-gray-400 text-center py-4">로딩 중...</p>
+                        ) : orders.length === 0 ? (
+                            <p className="text-gray-400 text-center py-4">결제 내역이 없습니다.</p>
+                        ) : (
+                            orders.map((order) => (
+                                <div key={order.id} className="flex justify-between items-center p-4 bg-gray-800 rounded-lg">
+                                    <div>
+                                        <p className="text-white font-medium">
+                                            {order.service_type === 'shooting' ? '촬영 서비스' :
+                                                order.service_type === 'editing' ? '편집 서비스' : '올인원 패키지'}
+                                        </p>
+                                        <p className="text-xs text-gray-400">
+                                            {new Date(order.created_at).toLocaleDateString()}
+                                        </p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-white font-bold">
+                                            {/* Amount is currently 0 in DB, so showing placeholder or logic */}
+                                            {order.amount > 0 ? `${order.amount.toLocaleString()}원` : '견적 산출 중'}
+                                        </p>
+                                        <span className={`text-xs ${order.status === 'completed' ? 'text-green-500' : 'text-yellow-500'}`}>
+                                            {order.status === 'completed' ? '결제 완료' : '입금 대기'}
+                                        </span>
+                                    </div>
                                 </div>
-                                <div className="text-right">
-                                    <p className="text-white font-bold">150,000원</p>
-                                    <span className="text-xs text-green-500">입금 완료</span>
-                                </div>
-                            </div>
-                        ))}
-                        <div className="flex justify-between items-center p-4 bg-gray-800 rounded-lg opacity-50">
-                            <div>
-                                <p className="text-white font-medium">프로젝트 #103 잔금</p>
-                                <p className="text-xs text-gray-400">2024.05.20</p>
-                            </div>
-                            <div className="text-right">
-                                <p className="text-white font-bold">100,000원</p>
-                                <span className="text-xs text-yellow-500">입금 대기</span>
-                            </div>
-                        </div>
+                            ))
+                        )}
                     </div>
 
                     <Button variant="outline" className="w-full mt-6 border-gray-600 text-white hover:bg-gray-800">

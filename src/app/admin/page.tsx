@@ -60,12 +60,34 @@ export default function AdminPage() {
         setLoading(true);
         try {
             if (activeTab === "orders") {
-                const { data, error } = await supabase
+                // Fetch orders first (without join to avoid RLS/FK issues)
+                const { data: ordersData, error: ordersError } = await supabase
                     .from('orders')
-                    .select('*, user:user_id(email)')
+                    .select('*')
                     .order('created_at', { ascending: false });
-                if (error) throw error;
-                setOrders(data || []);
+
+                if (ordersError) throw ordersError;
+
+                // Fetch profiles to map emails
+                const { data: profilesData, error: profilesError } = await supabase
+                    .from('profiles')
+                    .select('id, email');
+
+                if (profilesError) throw profilesError;
+
+                // Map profiles to orders
+                const profilesMap = (profilesData || []).reduce((acc: any, profile: any) => {
+                    acc[profile.id] = profile;
+                    return acc;
+                }, {});
+
+                const ordersWithUser = (ordersData || []).map((order: any) => ({
+                    ...order,
+                    user: profilesMap[order.user_id] || { email: 'Unknown' }
+                }));
+
+                setOrders(ordersWithUser);
+
             } else if (activeTab === "users") {
                 const { data, error } = await supabase
                     .from('profiles')

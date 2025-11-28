@@ -79,11 +79,13 @@ export default function AdminPage() {
                 if (profilesError) throw profilesError;
 
                 // Map profiles to orders
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const profilesMap = (profilesData || []).reduce((acc: any, profile: any) => {
                     acc[profile.id] = profile;
                     return acc;
                 }, {});
 
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const ordersWithUser = (ordersData || []).map((order: any) => ({
                     ...order,
                     user: profilesMap[order.user_id] || { email: 'Unknown' }
@@ -114,6 +116,7 @@ export default function AdminPage() {
                 if (error) throw error;
                 setBusinessInfos(data || []);
             }
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
             console.error(`Error fetching ${activeTab}:`, error);
             setError(error.message || "데이터를 불러오는 중 오류가 발생했습니다.");
@@ -268,6 +271,11 @@ export default function AdminPage() {
 
             {/* Content Area */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                {error && (
+                    <div className="p-4 bg-red-50 text-red-600 border-b border-red-100">
+                        오류 발생: {error}
+                    </div>
+                )}
                 {activeTab === "orders" && (
                     <div className="p-6">
                         <h3 className="text-lg font-bold text-accent mb-4">최근 주문 내역</h3>

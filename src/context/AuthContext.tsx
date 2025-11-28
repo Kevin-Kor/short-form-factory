@@ -96,13 +96,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const signInWithOAuth = async (provider: 'kakao' | 'google' | 'naver') => {
         try {
             const { error } = await supabase.auth.signInWithOAuth({
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                provider: provider as any,
-                options: {
-                    redirectTo: `${window.location.origin}/dashboard`,
-                },
-            });
-            if (error) throw error;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            provider: provider as any,
+            options: {
+                redirectTo: `${window.location.origin}/dashboard`,
+                scopes: provider === 'kakao' ? 'profile_nickname profile_image' : undefined,
+            },
+        });
+        if (error) throw error;
         } catch (error) {
             console.error("OAuth login failed", error);
         }

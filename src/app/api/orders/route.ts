@@ -12,25 +12,32 @@ export async function POST(request: Request) {
     try {
         const body = await request.json();
 
+        if (!body.userId) {
+            return NextResponse.json(
+                { error: "로그인이 필요합니다." },
+                { status: 401 }
+            );
+        }
+
         // Insert into Supabase
-        const { data, error } = await supabase
+        // Note: We do NOT use .select() here because the anon client might not have permission 
+        // to SELECT the row it just inserted depending on RLS policies (auth.uid() is null).
+        const { error } = await supabase
             .from('orders')
             .insert([
                 {
-                    user_id: body.userId, // Ensure userId is passed from frontend or extracted from session
+                    user_id: body.userId,
                     service_type: body.serviceType,
-                    details: body, // Store full JSON
+                    details: body,
                     status: 'pending',
-                    amount: 0 // Calculate amount on server side ideally
+                    amount: 0
                 }
-            ])
-            .select();
+            ]);
 
         if (error) throw error;
 
         return NextResponse.json({
             success: true,
-            order: data[0],
             message: "주문이 성공적으로 접수되었습니다."
         }, { status: 201 });
 

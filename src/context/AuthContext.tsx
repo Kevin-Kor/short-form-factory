@@ -15,6 +15,7 @@ interface RegisterData {
 interface AuthContextType {
     user: User | null;
     isLoggedIn: boolean;
+    isLoading: boolean;
     login: (email: string, password: string) => Promise<boolean>;
     register: (data: RegisterData) => Promise<boolean>;
     logout: () => Promise<void>;
@@ -25,18 +26,29 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         // Check active session
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            setUser(session?.user ?? null);
-        });
+        const initSession = async () => {
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                setUser(session?.user ?? null);
+            } catch (error) {
+                console.error("Error checking session:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        initSession();
 
         // Listen for auth changes
         const {
             data: { subscription },
         } = supabase.auth.onAuthStateChange((_event, session) => {
             setUser(session?.user ?? null);
+            setIsLoading(false); // Ensure loading is false after any auth change
         });
 
         return () => subscription.unsubscribe();
@@ -78,18 +90,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const logout = async () => {
         await supabase.auth.signOut();
+        setUser(null);
     };
 
     const signInWithOAuth = async (provider: 'kakao' | 'google' | 'naver') => {
-        // Note: Naver is not directly supported in types but works if configured in Supabase
-        // You might need to use 'kakao' | 'google' | 'azure' etc. or cast to any if strict.
-        // Supabase supports 'kakao', 'google', 'facebook', etc.
-        // 'naver' might require custom OIDC or waiting for official support if not present.
-        // For now we assume standard providers.
-
-        // Actually Supabase supports 'kakao', 'google'. 'naver' is supported via OIDC or WorkOS usually, 
-        // but let's assume 'kakao' and 'google' for now.
-
         try {
             const { error } = await supabase.auth.signInWithOAuth({
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -105,7 +109,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     return (
-        <AuthContext.Provider value={{ user, isLoggedIn: !!user, login, register, logout, signInWithOAuth }}>
+        <AuthContext.Provider value={{ user, isLoggedIn: !!user, isLoading, login, register, logout, signInWithOAuth }}>
             {children}
         </AuthContext.Provider>
     );

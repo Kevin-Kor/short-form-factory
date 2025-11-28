@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 
 export default function PaymentPage() {
-    const { user, isLoggedIn } = useAuth();
+    const { user, isLoggedIn, isLoading } = useAuth();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [orders, setOrders] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -34,6 +34,14 @@ export default function PaymentPage() {
             fetchOrders();
         }
     }, [user]);
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-[60vh]">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+            </div>
+        );
+    }
 
     if (!isLoggedIn) {
         return (

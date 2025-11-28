@@ -42,7 +42,7 @@ export function Sidebar() {
                     <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                         <span className="text-white font-bold text-xl">S</span>
                     </div>
-                    <span className="text-xl font-bold text-accent tracking-tight">Shorty</span>
+                    <span className="text-xl font-bold text-accent tracking-tight">Shortform Factory</span>
                 </Link>
             </div>
 

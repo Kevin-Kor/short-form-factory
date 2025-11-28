@@ -5,8 +5,8 @@ export default function OrderIndexPage() {
     return (
         <div className="space-y-8">
             <div>
-                <h1 className="text-3xl font-bold mb-2 text-white">영상 제작 신청</h1>
-                <p className="text-gray-400">원하시는 제작 방식을 선택해주세요.</p>
+                <h1 className="text-3xl font-bold mb-2 text-accent">영상 제작 신청</h1>
+                <p className="text-muted">원하시는 제작 방식을 선택해주세요.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

@@ -39,8 +39,8 @@ export default function SupportPage() {
         <div className="h-[calc(100vh-100px)] flex flex-col max-w-4xl mx-auto">
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-3xl font-bold text-white">고객 지원</h1>
-                    <p className="text-gray-400">AI 챗봇에게 궁금한 점을 물어보세요.</p>
+                    <h1 className="text-3xl font-bold text-accent">고객 지원</h1>
+                    <p className="text-muted">AI 챗봇에게 궁금한 점을 물어보세요.</p>
                 </div>
                 <Button className="bg-[#FAE100] text-[#371D1E] hover:bg-[#FAE100]/90 font-bold">
                     카카오톡 상담하기
@@ -48,7 +48,7 @@ export default function SupportPage() {
             </div>
 
             {/* Chat Window */}
-            <div className="flex-1 bg-surface rounded-xl border border-gray-700 flex flex-col overflow-hidden">
+            <div className="flex-1 bg-white rounded-xl border border-border flex flex-col overflow-hidden shadow-sm">
                 {/* Messages Area */}
                 <div className="flex-1 p-6 overflow-y-auto space-y-4">
                     {messages.map((msg) => (
@@ -61,7 +61,7 @@ export default function SupportPage() {
                         >
                             <div className={cn(
                                 "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
-                                msg.sender === "user" ? "bg-primary ml-3" : "bg-gray-700 mr-3"
+                                msg.sender === "user" ? "bg-primary ml-3" : "bg-gray-100 mr-3"
                             )}>
                                 {msg.sender === "user" ? <User size={16} /> : <Bot size={16} />}
                             </div>
@@ -69,7 +69,7 @@ export default function SupportPage() {
                                 "p-3 rounded-lg text-sm",
                                 msg.sender === "user"
                                     ? "bg-primary text-white rounded-tr-none"
-                                    : "bg-gray-800 text-gray-200 rounded-tl-none"
+                                    : "bg-gray-100 text-accent rounded-tl-none"
                             )}>
                                 {msg.text}
                             </div>
@@ -78,14 +78,14 @@ export default function SupportPage() {
                 </div>
 
                 {/* Input Area */}
-                <div className="p-4 bg-gray-900 border-t border-gray-700 flex gap-2">
+                <div className="p-4 bg-gray-50 border-t border-border flex gap-2">
                     <input
                         type="text"
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyPress={(e) => e.key === "Enter" && handleSend()}
                         placeholder="메시지를 입력하세요..."
-                        className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary"
+                        className="flex-1 bg-white border border-gray-300 rounded-lg px-4 py-2 text-accent focus:outline-none focus:border-primary"
                     />
                     <Button onClick={handleSend} className="bg-primary hover:bg-primary/90">
                         <Send size={18} />

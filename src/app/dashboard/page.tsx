@@ -38,7 +38,7 @@ export default function DashboardPage() {
                 transition={{ duration: 0.5 }}
                 className="flex justify-between items-center"
             >
-                <h1 className="text-2xl font-bold text-accent">Shorty</h1>
+                <h1 className="text-2xl font-bold text-accent">Shortform Factory</h1>
                 <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
                     <span className="text-xs font-bold text-gray-600">U</span>
                 </div>
@@ -150,6 +150,65 @@ export default function DashboardPage() {
                         </motion.div>
                     ))}
                 </motion.div>
+            </section>
+
+            {/* Partner Brands Slider */}
+            <section className="overflow-hidden py-8">
+                <motion.h2
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.7 }}
+                    className="text-xl font-bold mb-6 text-accent"
+                >
+                    함께하는 파트너
+                </motion.h2>
+
+                <div className="relative w-full overflow-hidden">
+                    <div className="flex">
+                        <motion.div
+                            className="flex gap-4 pr-4"
+                            animate={{ x: "-50%" }}
+                            transition={{
+                                repeat: Infinity,
+                                ease: "linear",
+                                duration: 30
+                            }}
+                            style={{ width: "max-content" }}
+                        >
+                            {[
+                                { name: "삼성전자", logo: "S" },
+                                { name: "LG생활건강", logo: "L" },
+                                { name: "무신사", logo: "M" },
+                                { name: "올리브영", logo: "O" },
+                                { name: "쿠팡", logo: "C" },
+                                { name: "토스", logo: "T" },
+                                { name: "카카오", logo: "K" },
+                                { name: "네이버", logo: "N" },
+                                { name: "배달의민족", logo: "B" },
+                                { name: "당근마켓", logo: "D" },
+                                { name: "삼성전자", logo: "S" },
+                                { name: "LG생활건강", logo: "L" },
+                                { name: "무신사", logo: "M" },
+                                { name: "올리브영", logo: "O" },
+                                { name: "쿠팡", logo: "C" },
+                                { name: "토스", logo: "T" },
+                                { name: "카카오", logo: "K" },
+                                { name: "네이버", logo: "N" },
+                                { name: "배달의민족", logo: "B" },
+                                { name: "당근마켓", logo: "D" },
+                            ].map((brand, index) => (
+                                <div key={index} className="flex items-center space-x-3 bg-white px-6 py-4 rounded-2xl border border-gray-100 shadow-sm whitespace-nowrap min-w-[180px]">
+                                    <div className="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center text-sm font-bold text-gray-400">
+                                        {brand.logo}
+                                    </div>
+                                    <span className="font-bold text-gray-600">{brand.name}</span>
+                                </div>
+                            ))}
+                        </motion.div>
+                    </div>
+                    <div className="absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
+                    <div className="absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
+                </div>
             </section>
         </div>
     );

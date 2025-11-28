@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
+import { Button } from "@/components/ui/Button";
 import { User, Shield, Building2, CreditCard } from "lucide-react";
 import { useState } from "react";
 
@@ -142,10 +143,54 @@ export default function ProfilePage() {
                 )}
 
                 {activeTab === "business" && (
-                    <div className="text-center py-12">
-                        <Building2 size={48} className="mx-auto text-gray-300 mb-4" />
-                        <h3 className="text-lg font-bold text-accent mb-2">사업자 정보 관리</h3>
-                        <p className="text-muted">세금계산서 발행을 위한 사업자 정보 등록 기능이 곧 추가될 예정입니다.</p>
+                    <div className="space-y-8">
+                        <div>
+                            <h2 className="text-lg font-bold text-accent mb-1">사업자 정보 관리</h2>
+                            <p className="text-sm text-muted">세금계산서 발행을 위한 사업자 정보를 등록해주세요.</p>
+                        </div>
+
+                        <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-accent">상호명 (법인명)</label>
+                                    <input type="text" className="w-full bg-white border border-gray-200 rounded-xl p-3 text-accent focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all" placeholder="예: 숏폼팩토리" />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-accent">대표자명</label>
+                                    <input type="text" className="w-full bg-white border border-gray-200 rounded-xl p-3 text-accent focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all" placeholder="예: 홍길동" />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-accent">사업자등록번호</label>
+                                    <input type="text" className="w-full bg-white border border-gray-200 rounded-xl p-3 text-accent focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all" placeholder="000-00-00000" />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-accent">법인등록번호 (선택)</label>
+                                    <input type="text" className="w-full bg-white border border-gray-200 rounded-xl p-3 text-accent focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all" placeholder="000000-0000000" />
+                                </div>
+                                <div className="space-y-2 md:col-span-2">
+                                    <label className="text-sm font-bold text-accent">사업장 주소</label>
+                                    <input type="text" className="w-full bg-white border border-gray-200 rounded-xl p-3 text-accent focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all" placeholder="주소를 입력해주세요" />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-accent">업태</label>
+                                    <input type="text" className="w-full bg-white border border-gray-200 rounded-xl p-3 text-accent focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all" placeholder="예: 서비스업" />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-accent">종목</label>
+                                    <input type="text" className="w-full bg-white border border-gray-200 rounded-xl p-3 text-accent focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all" placeholder="예: 영상제작" />
+                                </div>
+                                <div className="space-y-2 md:col-span-2">
+                                    <label className="text-sm font-bold text-accent">세금계산서 수신 이메일</label>
+                                    <input type="email" className="w-full bg-white border border-gray-200 rounded-xl p-3 text-accent focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all" placeholder="tax@example.com" />
+                                </div>
+                            </div>
+
+                            <div className="pt-4 flex justify-end">
+                                <Button className="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-8 rounded-xl shadow-lg shadow-primary/20">
+                                    저장하기
+                                </Button>
+                            </div>
+                        </form>
                     </div>
                 )}
             </div>

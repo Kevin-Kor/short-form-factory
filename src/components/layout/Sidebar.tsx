@@ -9,8 +9,8 @@ import {
     FolderOpen,
     Download,
     CreditCard,
-    MessageSquare,
     Settings,
+    HeadphonesIcon, // Added HeadphonesIcon
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
@@ -27,8 +27,9 @@ export function Sidebar() {
         { name: "영상 제작", href: "/order", icon: Video },
         { name: "내 콘텐츠", href: "/content", icon: FolderOpen },
         { name: "리소스", href: "/resources", icon: Download },
+        { name: "크레딧 관리", href: "/credits", icon: CreditCard }, // Added Credits item
         { name: "결제 관리", href: "/payment", icon: CreditCard },
-        { name: "고객 지원", href: "/support", icon: MessageSquare },
+        { name: "고객센터", href: "/support", icon: HeadphonesIcon }, // Modified "고객 지원" to "고객센터" and changed icon
     ];
 
     if (isAdmin) {

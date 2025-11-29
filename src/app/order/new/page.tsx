@@ -130,7 +130,11 @@ function OrderForm() {
                 const res = await fetch("/api/orders", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ ...formData, userId: user?.id }), // Add userId
+                    body: JSON.stringify({
+                        ...formData,
+                        userId: user?.id,
+                        amount: estimatedPrice
+                    }),
                 });
 
                 if (res.ok) {

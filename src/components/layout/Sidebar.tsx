@@ -10,7 +10,8 @@ import {
     Download,
     CreditCard,
     Settings,
-    HeadphonesIcon, // Added HeadphonesIcon
+    HeadphonesIcon,
+    ShoppingBag, // Added ShoppingBag
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
@@ -25,6 +26,7 @@ export function Sidebar() {
     const navItems = [
         { name: "대시보드", href: "/dashboard", icon: LayoutDashboard },
         { name: "영상 제작", href: "/order", icon: Video },
+        { name: "주문 내역", href: "/orders", icon: ShoppingBag }, // Added Order History
         { name: "내 콘텐츠", href: "/content", icon: FolderOpen },
         { name: "리소스", href: "/resources", icon: Download },
         { name: "크레딧 관리", href: "/credits", icon: CreditCard }, // Added Credits item

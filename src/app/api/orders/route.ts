@@ -22,6 +22,34 @@ export async function POST(request: Request) {
         // Insert into Supabase
         // Note: We do NOT use .select() here because the anon client might not have permission 
         // to SELECT the row it just inserted depending on RLS policies (auth.uid() is null).
+        const amount = body.amount || 0;
+
+        // 1. Check Credit Balance
+        const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('credit_balance')
+            .eq('id', body.userId)
+            .single();
+
+        if (profileError) throw profileError;
+
+        if ((profile?.credit_balance || 0) < amount) {
+            return NextResponse.json(
+                { error: "크레딧 잔액이 부족합니다." },
+                { status: 400 }
+            );
+        }
+
+        // 2. Deduct Credits
+        const newBalance = (profile?.credit_balance || 0) - amount;
+        const { error: updateError } = await supabase
+            .from('profiles')
+            .update({ credit_balance: newBalance })
+            .eq('id', body.userId);
+
+        if (updateError) throw updateError;
+
+        // 3. Insert Order
         const { error } = await supabase
             .from('orders')
             .insert([
@@ -30,7 +58,7 @@ export async function POST(request: Request) {
                     service_type: body.serviceType,
                     details: body,
                     status: 'pending',
-                    amount: 0
+                    amount: amount
                 }
             ]);
 

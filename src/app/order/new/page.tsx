@@ -33,7 +33,11 @@ function OrderForm() {
         formatOther: "",
         aiSource: false,
         // Common
-        details: "",
+        details: "", // Legacy field, keeping for safety
+        productInfo: "",
+        brandGoal: "",
+        toneManner: "",
+        referenceUrl: "",
         files: [],
         quantity: 1,
     });
@@ -418,6 +422,8 @@ function OrderForm() {
                                     <label className="block text-sm font-medium text-muted mb-1">제품/서비스 정보</label>
                                     <input
                                         type="text"
+                                        value={formData.productInfo}
+                                        onChange={(e) => setFormData({ ...formData, productInfo: e.target.value })}
                                         className="w-full bg-white border border-gray-300 rounded-xl p-3 text-accent focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
                                         placeholder="예: 다이어트 보조제, 홍대 맛집"
                                     />
@@ -428,6 +434,8 @@ function OrderForm() {
                                         <div>
                                             <label className="block text-sm font-medium text-muted mb-1">브랜드 목표 / 타겟 고객</label>
                                             <textarea
+                                                value={formData.brandGoal}
+                                                onChange={(e) => setFormData({ ...formData, brandGoal: e.target.value })}
                                                 className="w-full bg-white border border-gray-300 rounded-xl p-3 text-accent focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all h-24 resize-none"
                                                 placeholder="누구에게 어떤 메시지를 전달하고 싶으신가요? (예: 20대 여성에게 신제품 인지도 확산)"
                                             />
@@ -436,6 +444,8 @@ function OrderForm() {
                                             <label className="block text-sm font-medium text-muted mb-1">선호하는 톤앤매너</label>
                                             <input
                                                 type="text"
+                                                value={formData.toneManner}
+                                                onChange={(e) => setFormData({ ...formData, toneManner: e.target.value })}
                                                 className="w-full bg-white border border-gray-300 rounded-xl p-3 text-accent focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
                                                 placeholder="예: 유쾌한, 감성적인, 신뢰감 있는"
                                             />
@@ -447,6 +457,8 @@ function OrderForm() {
                                             {formData.serviceType === "shooting_editing" ? "촬영 콘티 / 스크립트" : "핵심 메시지 / 컨셉"}
                                         </label>
                                         <textarea
+                                            value={formData.details}
+                                            onChange={(e) => setFormData({ ...formData, details: e.target.value })}
                                             className="w-full bg-white border border-gray-300 rounded-xl p-3 text-accent focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all h-32 resize-none"
                                             placeholder={formData.serviceType === "shooting_editing"
                                                 ? "촬영에 필요한 대본이나 장면 구성을 적어주세요."
@@ -459,6 +471,8 @@ function OrderForm() {
                                     <label className="block text-sm font-medium text-muted mb-1">레퍼런스 URL (선택)</label>
                                     <input
                                         type="text"
+                                        value={formData.referenceUrl}
+                                        onChange={(e) => setFormData({ ...formData, referenceUrl: e.target.value })}
                                         className="w-full bg-white border border-gray-300 rounded-xl p-3 text-accent focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
                                         placeholder="참고할 만한 영상 링크가 있다면 붙여넣어주세요."
                                     />

@@ -37,14 +37,40 @@ export default function CreditsPage() {
             }
 
             // Fetch credit requests
-            const { data: requests, error } = await supabase
+            const { data: requests, error: requestsError } = await supabase
                 .from('credit_requests')
                 .select('*')
                 .eq('user_id', user!.id)
                 .order('created_at', { ascending: false });
 
-            if (error) throw error;
-            setHistory(requests || []);
+            if (requestsError) throw requestsError;
+
+            // Fetch orders (usage)
+            const { data: orders, error: ordersError } = await supabase
+                .from('orders')
+                .select('*')
+                .eq('user_id', user!.id)
+                .order('created_at', { ascending: false });
+
+            if (ordersError) throw ordersError;
+
+            // Combine and sort
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const combinedHistory = [
+                ...(requests || []).map((r: any) => ({ ...r, type: 'deposit' })),
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                ...(orders || []).map((o: any) => ({
+                    ...o,
+                    type: 'usage',
+                    amount: -o.amount, // Negative for usage
+                    depositor_name: o.service_type === 'shooting' ? '촬영 서비스' :
+                        o.service_type === 'editing' ? '편집 서비스' :
+                            o.service_type === 'shooting_editing' ? '촬영+편집' : '올인원 패키지',
+                    status: o.status === 'pending' ? 'pending' : 'completed' // Map order status
+                }))
+            ].sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+            setHistory(combinedHistory);
         } catch (error) {
             console.error("Error fetching credits data:", error);
         } finally {
@@ -204,7 +230,7 @@ export default function CreditsPage() {
                 <div className="flex flex-col md:flex-row justify-between items-center p-4 border-b border-gray-100 gap-4">
                     <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
                         <div className="px-4 py-2 rounded-md text-sm font-bold bg-primary text-white shadow-sm">
-                            충전 요청 내역 <span className="ml-1 opacity-80 text-xs">{history.length}</span>
+                            전체 내역 <span className="ml-1 opacity-80 text-xs">{history.length}</span>
                         </div>
                     </div>
 
@@ -228,10 +254,11 @@ export default function CreditsPage() {
                     <table className="w-full text-sm text-left">
                         <thead className="bg-gray-50 text-gray-500 font-medium border-b border-gray-100">
                             <tr>
-                                <th className="px-6 py-4">신청일시</th>
-                                <th className="px-6 py-4">충전금액</th>
-                                <th className="px-6 py-4">입금자명</th>
-                                <th className="px-6 py-4">처리상태</th>
+                                <th className="px-6 py-4">일시</th>
+                                <th className="px-6 py-4">구분</th>
+                                <th className="px-6 py-4">금액</th>
+                                <th className="px-6 py-4">내용</th>
+                                <th className="px-6 py-4">상태</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
@@ -247,14 +274,23 @@ export default function CreditsPage() {
                                 filteredHistory.map((item) => (
                                     <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
                                         <td className="px-6 py-4 text-gray-600">{new Date(item.created_at).toLocaleString()}</td>
-                                        <td className="px-6 py-4 font-bold text-blue-600">{formatCurrency(item.amount)}</td>
+                                        <td className="px-6 py-4">
+                                            <span className={`px-2 py-1 rounded text-xs font-bold ${item.type === 'deposit' ? 'bg-blue-100 text-blue-600' : 'bg-red-100 text-red-600'}`}>
+                                                {item.type === 'deposit' ? '충전' : '사용'}
+                                            </span>
+                                        </td>
+                                        <td className={`px-6 py-4 font-bold ${item.amount > 0 ? 'text-blue-600' : 'text-red-600'}`}>
+                                            {item.amount > 0 ? '+' : ''}{formatCurrency(item.amount)}
+                                            {item.bonus_amount > 0 && <span className="text-xs text-green-600 block">(+보너스 {formatCurrency(item.bonus_amount)})</span>}
+                                        </td>
                                         <td className="px-6 py-4 text-gray-600">{item.depositor_name}</td>
                                         <td className="px-6 py-4">
-                                            <span className={`px-2 py-1 rounded-full text-xs font-bold ${item.status === "approved" ? "bg-green-100 text-green-700" :
+                                            <span className={`px-2 py-1 rounded-full text-xs font-bold ${item.status === "approved" || item.status === "completed" ? "bg-green-100 text-green-700" :
                                                 item.status === "pending" ? "bg-yellow-100 text-yellow-700" :
                                                     "bg-red-100 text-red-700"
                                                 }`}>
                                                 {item.status === "approved" && "승인됨"}
+                                                {item.status === "completed" && "결제완료"}
                                                 {item.status === "pending" && "대기중"}
                                                 {item.status === "rejected" && "거부됨"}
                                             </span>

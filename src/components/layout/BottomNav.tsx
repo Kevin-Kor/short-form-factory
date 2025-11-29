@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Home, Grid, FileText, User } from "lucide-react";
+import { Home, Grid, FileText, User, ShoppingBag, CreditCard } from "lucide-react";
 
 export function BottomNav() {
     const pathname = usePathname();
@@ -11,7 +11,8 @@ export function BottomNav() {
     const navItems = [
         { name: "홈", href: "/dashboard", icon: Home },
         { name: "서비스", href: "/order", icon: Grid },
-        { name: "내 콘텐츠", href: "/content", icon: FileText },
+        { name: "주문내역", href: "/orders", icon: ShoppingBag },
+        { name: "크레딧", href: "/credits", icon: CreditCard },
         { name: "마이", href: "/payment", icon: User },
     ];
 

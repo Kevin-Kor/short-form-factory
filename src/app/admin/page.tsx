@@ -19,6 +19,8 @@ export default function AdminPage() {
     const [creditRequests, setCreditRequests] = useState<any[]>([]);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [businessInfos, setBusinessInfos] = useState<any[]>([]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [selectedOrder, setSelectedOrder] = useState<any>(null);
 
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState("orders"); // orders | users | credits | business
@@ -401,11 +403,119 @@ export default function AdminPage() {
                                                 >
                                                     삭제
                                                 </button>
+                                                <button
+                                                    className="px-3 py-1 bg-blue-100 text-blue-600 rounded-md text-xs hover:bg-blue-200 ml-2"
+                                                    onClick={() => setSelectedOrder(order)}
+                                                >
+                                                    상세보기
+                                                </button>
                                             </td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+                )}
+
+                {/* Order Details Modal */}
+                {selectedOrder && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                        <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 space-y-6">
+                            <div className="flex justify-between items-start">
+                                <div>
+                                    <h3 className="text-xl font-bold text-accent">주문 상세 정보 (#{selectedOrder.id})</h3>
+                                    <p className="text-sm text-muted">{new Date(selectedOrder.created_at).toLocaleString()}</p>
+                                </div>
+                                <button onClick={() => setSelectedOrder(null)} className="text-gray-400 hover:text-gray-600">
+                                    <span className="text-2xl">&times;</span>
+                                </button>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="p-4 bg-gray-50 rounded-xl">
+                                        <p className="text-sm font-bold text-gray-500 mb-1">서비스 종류</p>
+                                        <p className="font-medium text-accent">
+                                            {selectedOrder.service_type === 'shooting' ? '촬영' :
+                                                selectedOrder.service_type === 'editing' ? '편집' :
+                                                    selectedOrder.service_type === 'shooting_editing' ? '촬영 + 편집' : '올인원'}
+                                        </p>
+                                    </div>
+                                    <div className="p-4 bg-gray-50 rounded-xl">
+                                        <p className="text-sm font-bold text-gray-500 mb-1">결제 금액</p>
+                                        <p className="font-bold text-blue-600">{(selectedOrder.amount || 0).toLocaleString()}원</p>
+                                    </div>
+                                </div>
+
+                                <div className="border-t border-gray-100 pt-4 space-y-4">
+                                    <div>
+                                        <p className="text-sm font-bold text-gray-500 mb-1">제품/서비스 정보</p>
+                                        <p className="text-accent bg-gray-50 p-3 rounded-lg">{selectedOrder.details?.productInfo || '-'}</p>
+                                    </div>
+                                    {selectedOrder.details?.brandGoal && (
+                                        <div>
+                                            <p className="text-sm font-bold text-gray-500 mb-1">브랜드 목표 / 타겟</p>
+                                            <p className="text-accent bg-gray-50 p-3 rounded-lg whitespace-pre-wrap">{selectedOrder.details.brandGoal}</p>
+                                        </div>
+                                    )}
+                                    {selectedOrder.details?.toneManner && (
+                                        <div>
+                                            <p className="text-sm font-bold text-gray-500 mb-1">톤앤매너</p>
+                                            <p className="text-accent bg-gray-50 p-3 rounded-lg">{selectedOrder.details.toneManner}</p>
+                                        </div>
+                                    )}
+                                    {selectedOrder.details?.details && (
+                                        <div>
+                                            <p className="text-sm font-bold text-gray-500 mb-1">상세 요청사항 / 컨셉</p>
+                                            <p className="text-accent bg-gray-50 p-3 rounded-lg whitespace-pre-wrap">{selectedOrder.details.details}</p>
+                                        </div>
+                                    )}
+                                    {selectedOrder.details?.referenceUrl && (
+                                        <div>
+                                            <p className="text-sm font-bold text-gray-500 mb-1">레퍼런스 URL</p>
+                                            <a href={selectedOrder.details.referenceUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline break-all">
+                                                {selectedOrder.details.referenceUrl}
+                                            </a>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="border-t border-gray-100 pt-4">
+                                    <p className="text-sm font-bold text-gray-500 mb-2">선택 옵션</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        {selectedOrder.details?.camera && (
+                                            <span className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-600">
+                                                카메라: {selectedOrder.details.camera === 'pro' ? '전문가용' : '아이폰'}
+                                            </span>
+                                        )}
+                                        {selectedOrder.details?.location && (
+                                            <span className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-600">
+                                                장소: {selectedOrder.details.location === 'studio' ? '스튜디오' : selectedOrder.details.location === 'outdoor' ? '야외' : '방문'}
+                                            </span>
+                                        )}
+                                        {selectedOrder.details?.duration && (
+                                            <span className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-600">
+                                                길이: {selectedOrder.details.duration === 'under_30s' ? '30초 이내' : '1분 이내'}
+                                            </span>
+                                        )}
+                                        {selectedOrder.details?.editingType && (
+                                            <span className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-600">
+                                                편집: {selectedOrder.details.editingType === 'cut_only' ? '컷편집' : '풀편집'}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="flex justify-end pt-4">
+                                <button
+                                    onClick={() => setSelectedOrder(null)}
+                                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-bold"
+                                >
+                                    닫기
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )}
